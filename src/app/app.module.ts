@@ -5,6 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthComponent } from './components/auth/auth.component';
+import { STOCKER_API_URL } from './app-injection-tokens';
+import { environment } from '../environments/environment.development';
+import { JwtModule } from '@auth0/angular-jwt';
+import { ACCESS_TOKEN_KEY } from './services/auth.service'
+
+export function tokenGetter() {
+  return localStorage.getItem(ACCESS_TOKEN_KEY)
+}
 
 @NgModule({
   declarations: [
@@ -14,12 +22,19 @@ import { AuthComponent } from './components/auth/auth.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule, 
+
+    JwtModule.forRoot({
+      config: {
+        tokenGetter,
+        allowedDomains: environment.whiteListedDomains
+      }
+    })
   ],
   providers: [
     { 
-      provide: '',
-      useValue: ''
+      provide: STOCKER_API_URL,
+      useValue: environment.stockerApi
     }
   ],
   bootstrap: [AppComponent]

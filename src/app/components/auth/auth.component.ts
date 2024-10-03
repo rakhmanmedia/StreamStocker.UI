@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth',
@@ -7,4 +9,16 @@ import { Component } from '@angular/core';
 })
 export class AuthComponent {
 
+  constructor(private authServ: AuthService,
+    private router: Router
+  ) {
+
+  }
+
+  onLogin(email: string, password: string) {
+    this.authServ.logIn(email, password).subscribe(res => {
+      this.router.navigateByUrl('auth')
+    }, error => { 
+      alert('Wrong email or password!')});
+  }
 }
