@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { STOCKER_API_URL } from '../app-injection-tokens';
-import { Token } from '../models/token';
+import { BaseResponse } from '../models/baseResponse'
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
@@ -20,9 +20,9 @@ export class AuthService {
     private router: Router
     ) { }
 
-  logIn(email: string, password: string): Observable<Token> {
-    return this.http.post<Token>(`${this.stockerApi}/api/auth/login`, { email, password }).pipe(tap(token => {
-      localStorage.setItem(ACCESS_TOKEN_KEY, token.access_token)
+  logIn(email: string, password: string): Observable<BaseResponse> {
+    return this.http.post<BaseResponse>(`${this.stockerApi}/api/auth/login`, { email, password }).pipe(tap(response => {
+      localStorage.setItem(ACCESS_TOKEN_KEY, response.data)
     }));
   }
 
@@ -32,6 +32,7 @@ export class AuthService {
   }
 
   logOut(): void {
-    this.router.navigate(['']);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    this.router.navigate(['auth']);
   }
 }

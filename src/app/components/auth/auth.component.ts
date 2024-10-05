@@ -9,16 +9,26 @@ import { Router } from '@angular/router';
 })
 export class AuthComponent {
 
-  constructor(private authServ: AuthService,
-    private router: Router
-  ) {
+  showError: boolean = false;
+  errMessage:string = '';
 
+  constructor(private authServ: AuthService,
+    private router: Router) {
   }
 
   onLogin(email: string, password: string) {
-    this.authServ.logIn(email, password).subscribe(res => {
-      this.router.navigateByUrl('auth')
-    }, error => { 
-      alert('Wrong email or password!')});
+    this.authServ.logIn(email, password).subscribe(res => { 
+      if (res.data != null) {
+        this.showError = false;
+        this.router.navigateByUrl('auth');
+      }
+      else { 
+        this.errMessage = res.description;
+        this.showError = true; 
+      }
+    }, err => {
+      this.showError = true;
+      this.errMessage = err.error;
+    });
   }
 }
