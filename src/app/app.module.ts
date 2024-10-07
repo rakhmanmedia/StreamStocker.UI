@@ -17,6 +17,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ContentComponent } from './core/components/content/content.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FooterComponent } from './core/components/footer/footer.component';
+import { ExpectedStockComponent } from './components/expected-stock/expected-stock.component';
+import { EmptyStockComponent } from './components/empty-stock/empty-stock.component';
+import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.component';
 
 export function tokenGetter() {
   return localStorage.getItem(ACCESS_TOKEN_KEY)
@@ -33,7 +36,10 @@ export function tokenGetter() {
     Page404Component,
     ContentComponent,
     DashboardComponent,
-    FooterComponent
+    FooterComponent,
+    ExpectedStockComponent,
+    EmptyStockComponent,
+    LoadedStockComponent
   ],
   imports: [
     BrowserModule,
