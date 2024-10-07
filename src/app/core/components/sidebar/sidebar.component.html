@@ -26,7 +26,9 @@
                     Main
                 </span>
             </div>
+
             <div class="menu-item here show" data-menu-item-toggle="accordion" data-menu-item-trigger="click">
+                
                 <div class="menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]" tabindex="0">
                     <span class="menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]">
                         <i class="ki-filled ki-logistic text-lg">
@@ -42,25 +44,29 @@
                         </i>
                     </span>
                 </div>
+                
                 <div class="menu-accordion gap-0.5 pl-[10px] relative before:absolute before:left-[20px] before:top-0 before:bottom-0 before:border-l before:border-gray-200">
                  
-                    <div class="menu-item" *ngFor="let stock of stocksMenu; let i = index" [class.active]="i === selectedIndex" (click)="linkActive(i)">
-                        <div class="menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg gap-[14px] pl-[10px] pr-[10px] py-[8px]" tabindex="0" routerLink="{{stock.link}}">
+                    <div class="menu-item" *ngFor="let stock of stocksMenu; let i = index" routerLinkActive="active">
+                        <a class="menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg gap-[14px] pl-[10px] pr-[10px] py-[8px]" tabindex="0" routerLink="{{stock.link}}" (click)="clickMenuItem(stock.name)">
                             <span class="menu-bullet flex w-[6px] relative before:absolute before:top-0 before:size-[6px] before:rounded-full before:-translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-primary menu-item-hover:before:bg-primary">
                             </span>
                             <span class="menu-title text-2sm font-normal text-gray-800 menu-item-active:text-primary menu-item-active:font-semibold menu-link-hover:!text-primary">
                                 {{stock.name}}
                             </span>
-                        </div>
+                        </a>
                     </div>
                  
-                 
-                 
-                 
                 </div>
-               </div>
-               
 
+            </div>
+
+            <div class="menu-item pt-2.25 pb-px">
+                <span class="menu-heading uppercase text-2sm font-medium text-gray-500 pl-[10px] pr-[10px]">
+                    Tools
+                </span>
+            </div>
+               
         </div>
         <!-- End Sidebar Menu -->
     </div>

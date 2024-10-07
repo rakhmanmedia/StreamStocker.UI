@@ -11,9 +11,11 @@ import { ACCESS_TOKEN_KEY } from './services/auth.service';
 import { StocksComponent } from './components/stocks/stocks.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
 import { SidebarComponent } from './core/components/sidebar/sidebar.component';
-import { WrapperComponent } from './core/components/wrapper/wrapper.component';
 import { HeaderComponent } from './core/components/header/header.component';
 import { Page404Component } from './components/page-404/page-404.component';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ContentComponent } from './core/components/content/content.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 export function tokenGetter() {
   return localStorage.getItem(ACCESS_TOKEN_KEY)
@@ -26,14 +28,17 @@ export function tokenGetter() {
     StocksComponent,
     LayoutComponent,
     SidebarComponent,
-    WrapperComponent,
     HeaderComponent,
-    Page404Component
+    Page404Component,
+    ContentComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule, 
+    RouterLink,
+    RouterLinkActive,
 
     JwtModule.forRoot({
       config: {

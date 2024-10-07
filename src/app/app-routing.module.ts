@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
+import { StocksComponent } from './components/stocks/stocks.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 const routes: Routes = [
   {
@@ -10,7 +12,17 @@ const routes: Routes = [
   },
   {
     path: '',
-    component: LayoutComponent
+    component: LayoutComponent,
+    children: [
+      {
+        path: '',
+        component: DashboardComponent
+      },
+      {
+        path: 'stocks',
+        component: StocksComponent
+      }
+    ]
   }
 ];
 

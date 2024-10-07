@@ -2,11 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { STOCKER_API_URL } from '../app-injection-tokens';
 import { BaseResponse } from '../models/baseResponse'
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { User } from "../models/user";
 
 export const ACCESS_TOKEN_KEY = 'stocker access token key';
+export const CURRENT_USER = 'current user'
 
 @Injectable({
   providedIn: 'root'
@@ -14,15 +16,21 @@ export const ACCESS_TOKEN_KEY = 'stocker access token key';
 
 export class AuthService {
 
+  private user: BehaviorSubject<User> | undefined;
+
   constructor(private http: HttpClient, 
     @Inject(STOCKER_API_URL) private stockerApi: string,
     private jwtHelper: JwtHelperService,
-    private router: Router
-    ) { }
+    private router: Router) { }
 
   logIn(email: string, password: string): Observable<BaseResponse> {
     return this.http.post<BaseResponse>(`${this.stockerApi}/api/auth/login`, { email, password }).pipe(tap(response => {
-      localStorage.setItem(ACCESS_TOKEN_KEY, response.data)
+      localStorage.setItem(ACCESS_TOKEN_KEY, response.data);
+
+      if (response.data != null || response.data != '')
+      {
+        this.setAccount(email, password);
+      }
     }));
   }
 
@@ -34,5 +42,9 @@ export class AuthService {
   logOut(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     this.router.navigate(['auth']);
+  }
+
+  private setAccount(email: string, password: string) {
+    this.http.get<BaseResponse>(`${this.stockerApi}/api/user/get-user`, {headers: { email, password } }).pipe(tap(response => this.user?.next(response.data)));
   }
 }

@@ -20,7 +20,7 @@ export class AuthComponent {
     this.authServ.logIn(email, password).subscribe(res => { 
       if (res.data != null) {
         this.showError = false;
-        this.router.navigateByUrl('auth');
+        this.router.navigateByUrl('');
       }
       else { 
         this.errMessage = res.description;
