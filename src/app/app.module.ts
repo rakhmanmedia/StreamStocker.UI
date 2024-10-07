@@ -8,7 +8,6 @@ import { STOCKER_API_URL } from './app-injection-tokens';
 import { environment } from '../environments/environment.development';
 import { JwtModule } from '@auth0/angular-jwt';
 import { ACCESS_TOKEN_KEY } from './services/auth.service';
-import { StocksComponent } from './components/stocks/stocks.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
 import { SidebarComponent } from './core/components/sidebar/sidebar.component';
 import { HeaderComponent } from './core/components/header/header.component';
@@ -29,7 +28,6 @@ export function tokenGetter() {
   declarations: [
     AppComponent,
     AuthComponent,
-    StocksComponent,
     LayoutComponent,
     SidebarComponent,
     HeaderComponent,
