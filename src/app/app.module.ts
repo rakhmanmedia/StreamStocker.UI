@@ -16,6 +16,7 @@ import { Page404Component } from './components/page-404/page-404.component';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ContentComponent } from './core/components/content/content.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { FooterComponent } from './core/components/footer/footer.component';
 
 export function tokenGetter() {
   return localStorage.getItem(ACCESS_TOKEN_KEY)
@@ -31,7 +32,8 @@ export function tokenGetter() {
     HeaderComponent,
     Page404Component,
     ContentComponent,
-    DashboardComponent
+    DashboardComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,
