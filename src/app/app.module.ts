@@ -19,6 +19,7 @@ import { ExpectedStockComponent } from './components/expected-stock/expected-sto
 import { EmptyStockComponent } from './components/empty-stock/empty-stock.component';
 import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
+import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
 
 // export function tokenGetter() {
 //   console.log('tokenGetter');
@@ -38,7 +39,8 @@ import { LayoutComponent } from './core/components/layout/layout.component';
     ExpectedStockComponent,
     EmptyStockComponent,
     LoadedStockComponent,
-    LayoutComponent
+    LayoutComponent,
+    ExpectedStockDetailComponent
   ],
   imports: [
     BrowserModule,
