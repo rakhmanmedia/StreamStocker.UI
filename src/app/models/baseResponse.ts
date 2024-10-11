@@ -1,4 +1,4 @@
-export interface BaseResponse {
+export interface IBaseResponse {
     description: string,
     statusCode: any,
     data: any

@@ -4,11 +4,10 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthComponent } from './components/auth/auth.component';
-import { STOCKER_API_URL } from './app-injection-tokens';
+import { STOCKER_API_URL, STOCKER_AUTH_HEADER_OPT } from './app-injection-tokens';
 import { environment } from '../environments/environment.development';
 import { JwtModule } from '@auth0/angular-jwt';
 import { ACCESS_TOKEN_KEY } from './services/auth.service';
-import { LayoutComponent } from './core/components/layout/layout.component';
 import { SidebarComponent } from './core/components/sidebar/sidebar.component';
 import { HeaderComponent } from './core/components/header/header.component';
 import { Page404Component } from './components/page-404/page-404.component';
@@ -19,16 +18,17 @@ import { FooterComponent } from './core/components/footer/footer.component';
 import { ExpectedStockComponent } from './components/expected-stock/expected-stock.component';
 import { EmptyStockComponent } from './components/empty-stock/empty-stock.component';
 import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.component';
+import { LayoutComponent } from './core/components/layout/layout.component';
 
-export function tokenGetter() {
-  return localStorage.getItem(ACCESS_TOKEN_KEY)
-}
+// export function tokenGetter() {
+//   console.log('tokenGetter');
+//   return localStorage.getItem(ACCESS_TOKEN_KEY)
+// }
 
 @NgModule({
   declarations: [
     AppComponent,
     AuthComponent,
-    LayoutComponent,
     SidebarComponent,
     HeaderComponent,
     Page404Component,
@@ -37,7 +37,8 @@ export function tokenGetter() {
     FooterComponent,
     ExpectedStockComponent,
     EmptyStockComponent,
-    LoadedStockComponent
+    LoadedStockComponent,
+    LayoutComponent
   ],
   imports: [
     BrowserModule,
@@ -48,7 +49,9 @@ export function tokenGetter() {
 
     JwtModule.forRoot({
       config: {
-        tokenGetter,
+        tokenGetter: () => {
+          return localStorage.getItem(ACCESS_TOKEN_KEY);
+        },
         allowedDomains: environment.whiteListedDomains
       }
     })
@@ -57,6 +60,10 @@ export function tokenGetter() {
     { 
       provide: STOCKER_API_URL,
       useValue: environment.stockerApi
+    },
+    {
+      provide: STOCKER_AUTH_HEADER_OPT,
+      useValue: environment.stokerAuthHeaderOpt
     }
   ],
   bootstrap: [AppComponent]

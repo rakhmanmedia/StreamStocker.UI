@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { STOCKER_API_URL } from '../app-injection-tokens';
-import { BaseResponse } from '../models/baseResponse'
+import { IBaseResponse } from '../models/baseResponse'
 import { Observable, tap, of, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { User } from "../models/user";
+import { IUser } from "../models/user";
 
 export const ACCESS_TOKEN_KEY = 'stocker access token key';
 export const CURRENT_USER = 'current user'
@@ -16,27 +16,26 @@ export const CURRENT_USER = 'current user'
 
 export class AuthService {
 
-  private user: BehaviorSubject<User> | undefined;
+  private user: BehaviorSubject<IUser> | undefined;
 
   constructor(private http: HttpClient, 
     @Inject(STOCKER_API_URL) private stockerApi: string,
     private jwtHelper: JwtHelperService,
     private router: Router) { }
 
-  logIn(email: string, password: string): Observable<BaseResponse> {
-    return this.http.post<BaseResponse>(`${this.stockerApi}/api/auth/login`, { email, password }).pipe(tap(response => {
+  logIn(email: string, password: string): Observable<IBaseResponse> {
+    return this.http.post<IBaseResponse>(`${this.stockerApi}/api/auth/login`, { email, password }).pipe(tap(response => {
       localStorage.setItem(ACCESS_TOKEN_KEY, response.data);
-
-      if (response.data != null || response.data != '')
-      {
-        this.setAccount(email, password);
-      }
     }));
   }
 
   isAuthenticated(): boolean {
     var token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    return this.jwtHelper.isTokenExpired(token);
+
+    //console.log(token);
+    //console.log(this.jwtHelper.tokenGetter());
+    //console.log(this.jwtHelper.isTokenExpired(token));
+    return !this.jwtHelper.isTokenExpired(token);
   }
 
   logOut(): void {
@@ -45,6 +44,6 @@ export class AuthService {
   }
 
   private setAccount(email: string, password: string) {
-    this.http.get<BaseResponse>(`${this.stockerApi}/api/user/get-user`, {headers: { email, password } }).pipe(tap(response => this.user?.next(response.data)));
+    this.http.get<IBaseResponse>(`${this.stockerApi}/api/user/get-user`, {headers: { email, password } }).pipe(tap(response => this.user?.next(response.data)));
   }
 }

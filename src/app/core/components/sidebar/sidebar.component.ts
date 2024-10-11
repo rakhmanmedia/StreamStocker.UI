@@ -9,9 +9,9 @@ import { TitleService } from '../../../services/titleService/title.service';
 
 export class SidebarComponent {
   stocksMenu = [
-    { name: 'Expected Stock', link: 'expected-stock' },
-    { name: 'Empty Stock', link: 'empty-stock' },
-    { name: 'Loaded Stock', link: 'loaded-stock' }
+    { name: 'Сток ожидаемых', link: 'expected-stock', parent: 'Стоки' },
+    { name: 'Сток порожних', link: 'empty-stock' },
+    { name: 'Сток груженых', link: 'loaded-stock' }
   ];
 
   selectedMenuItem: string = 'Dashboard'; 

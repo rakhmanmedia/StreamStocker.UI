@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
-  styleUrl: './auth.component.css'
+  styleUrl: './auth.component.css',
+  host: {'class':'flex items-center justify-center grow bg-center bg-no-repeat page-bg'}
 })
 export class AuthComponent {
 
@@ -20,7 +21,7 @@ export class AuthComponent {
     this.authServ.logIn(email, password).subscribe(res => { 
       if (res.data != null) {
         this.showError = false;
-        this.router.navigateByUrl('');
+        this.router.navigateByUrl('dashboard');
       }
       else { 
         this.errMessage = res.description;
