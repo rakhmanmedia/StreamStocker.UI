@@ -1,1 +1,118 @@
-<p>expected-stock-detail works!</p>
+<div class="container-fixed">
+  <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
+    <div class="flex flex-col justify-center gap-2">
+      <h1 class="text-xl font-medium leading-none text-gray-900">
+        Ожидаемые контейнеры
+      </h1>
+      <div class="flex items-center flex-wrap gap-1.5 font-medium">
+        <span class="text-md text-gray-700 font-normal">
+          Всего контейнеров:
+        </span>
+        <span class="text-md text-gray-800 font-medium me-2">
+          {{expectedStocks.length}}
+        </span>
+        <span class="text-md text-gray-700 font-normal">
+          Груженых:
+        </span>
+        <span class="text-md text-gray-800 font-medium">
+          <!-- {{expectedStocks.filter(el => el.expe)}} -->
+        </span>
+        <span class="text-md text-gray-700 font-normal">
+          Порожних:
+        </span>
+        <span class="text-md text-gray-800 font-medium">
+          <!-- {{emptyCount}} -->
+        </span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2.5">
+      <a class="btn btn-sm btn-light" href="#">
+        Импорт из файла
+      </a>
+      <a class="btn btn-sm btn-primary" href="#">
+        Добавить
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container-fixed">
+  <div class="grid gap-5 lg:gap-7.5">
+    <div class="card card-grid min-w-full">
+      <div class="card-body">
+        <div class="scrollable-x-auto">
+          <table datatable [dtOptions]="dataTableOptions" [dtTrigger]="dataTableTrigger"
+            class="table table-auto table-border align-middle text-gray-700 font-medium text-sm" id="datatable_1">
+            <thead>
+              <tr>
+                <th>
+                  <span class="sort">
+                    <span class="sort-label font-normal text-gray-700">
+                      ID
+                    </span>
+                    <span class="sort-icon"></span>
+                  </span>
+                </th>
+                <th>
+                  <span class="sort">
+                    <span class="sort-label font-normal text-gray-700">
+                      Контейнер
+                    </span>
+                    <span class="sort-icon"></span>
+                  </span>
+                </th>
+                <th>
+                  <span class="sort">
+                    <span class="sort-label font-normal text-gray-700">
+                      Тип
+                    </span>
+                    <span class="sort-icon"></span>
+                  </span>
+                </th>
+                <th>
+                  <span class="sort">
+                    <span class="sort-label font-normal text-gray-700">
+                      Состояние
+                    </span>
+                    <span class="sort-icon"> </span>
+                  </span>
+                </th>
+                <th>
+                  <span class="sort">
+                    <span class="sort-label font-normal text-gray-700">
+                      Дата заявки
+                    </span>
+                    <span class="sort-icon"> </span>
+                  </span>
+                </th>
+                <th>
+                  <span class="sort">
+                    <span class="sort-label font-normal text-gray-700">
+                      Статус
+                    </span>
+                    <span class="sort-icon"> </span>
+                  </span>
+                </th>
+                <th class="w-[60px]">
+                </th>
+                <th class="w-[60px]">
+                </th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <td></td>
+                <td><input type="text" /></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

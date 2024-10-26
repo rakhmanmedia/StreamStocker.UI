@@ -1,5 +1,5 @@
-export interface IBaseResponse {
+export interface IBaseResponse<T> {
     description: string,
     statusCode: any,
-    data: any
+    data: T
 }

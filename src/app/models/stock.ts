@@ -9,5 +9,7 @@ export interface IStock {
     location: ILocation,
     keeper: IKeeper,
     agent: IAgent,
-    shipOwner: IShipOwner
+    shipOwner: IShipOwner,
+    emptyCntrsCount: number,
+    loadedCntrsCount: number
 }

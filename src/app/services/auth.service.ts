@@ -23,8 +23,8 @@ export class AuthService {
     private jwtHelper: JwtHelperService,
     private router: Router) { }
 
-  logIn(email: string, password: string): Observable<IBaseResponse> {
-    return this.http.post<IBaseResponse>(`${this.stockerApi}/api/auth/login`, { email, password }).pipe(tap(response => {
+  logIn(email: string, password: string): Observable<IBaseResponse<string>> {
+    return this.http.post<IBaseResponse<string>>(`${this.stockerApi}/api/auth/login`, { email, password }).pipe(tap(response => {
       localStorage.setItem(ACCESS_TOKEN_KEY, response.data);
     }));
   }
@@ -43,7 +43,7 @@ export class AuthService {
     this.router.navigate(['auth']);
   }
 
-  private setAccount(email: string, password: string) {
-    this.http.get<IBaseResponse>(`${this.stockerApi}/api/user/get-user`, {headers: { email, password } }).pipe(tap(response => this.user?.next(response.data)));
-  }
+  // private setAccount(email: string, password: string) {
+  //   this.http.get<IBaseResponse>(`${this.stockerApi}/api/user/get-user`, {headers: { email, password } }).pipe(tap(response => this.user?.next(response.data)));
+  // }
 }

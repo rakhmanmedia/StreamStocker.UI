@@ -20,11 +20,7 @@ import { EmptyStockComponent } from './components/empty-stock/empty-stock.compon
 import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
-
-// export function tokenGetter() {
-//   console.log('tokenGetter');
-//   return localStorage.getItem(ACCESS_TOKEN_KEY)
-// }
+import { DataTablesModule } from 'angular-datatables';
 
 @NgModule({
   declarations: [
@@ -40,14 +36,16 @@ import { ExpectedStockDetailComponent } from './components/expected-stock-detail
     EmptyStockComponent,
     LoadedStockComponent,
     LayoutComponent,
-    ExpectedStockDetailComponent
+    ExpectedStockDetailComponent,
+    
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule, 
+    HttpClientModule,
     RouterLink,
     RouterLinkActive,
+    DataTablesModule,
 
     JwtModule.forRoot({
       config: {
@@ -70,4 +68,8 @@ import { ExpectedStockDetailComponent } from './components/expected-stock-detail
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+
+export class AppModule { 
+
+}
+
