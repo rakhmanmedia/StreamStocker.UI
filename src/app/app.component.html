@@ -1,1 +1,23 @@
-<router-outlet />
+<!-- Sidebar -->
+<app-sidebar class="sidebar dark:bg-coal-600 bg-light border-r border-r-gray-200 dark:border-r-coal-100 fixed top-0 bottom-0 z-20 hidden lg:flex flex-col items-stretch shrink-0" data-drawer="true" data-drawer-class="drawer drawer-start top-0 bottom-0" data-drawer-enable="true|lg:false" id="sidebar"></app-sidebar>
+<!-- End Sidebar -->
+
+<!-- Wrapper -->
+<div class="wrapper flex grow flex-col">
+
+    <!-- Header -->
+    <app-header
+        class="header fixed top-0 z-10 left-0 right-0 flex items-stretch shrink-0 bg-[--tw-page-bg] dark:bg-[--tw-page-bg-dark]"
+        data-sticky="true" data-sticky-class="shadow-sm" data-sticky-name="header" id="header"></app-header>
+    <!-- End Header -->
+
+    <!-- Content -->
+    <main class="grow content pt-5" id="content" role="content"><router-outlet /></main>
+    <!-- End Content -->
+
+    <!-- Footer -->
+    <app-footer class="footer"></app-footer>
+    <!-- End Footer -->
+
+</div>
+<!-- End Wrapper -->
