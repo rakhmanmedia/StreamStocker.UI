@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ExpectedStockComponent } from './components/expected-stock/expected-stock.component';
@@ -12,27 +12,11 @@ const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full'},
   { path: 'expected-stock', component: ExpectedStockComponent },
+  { path: 'expected-stock/:id', component: ExpectedStockDetailComponent },
   { path: 'expected-stock/detail', component: ExpectedStockDetailComponent },
   { path: '**', component: Page404Component }
 
-  // {
-  //   path: '',
-  //   component: LayoutComponent,
-  //   children: [
-  //     {
-  //       path: 'dashboard',
-  //       component: DashboardComponent
-  //     },
-  //     {
-  //       path: 'expected-stock',
-  //       component: ExpectedStockComponent,
-  //     },
-  //     {
-  //       path: 'expected-stock/detail',
-  //       component: ExpectedStockDetailComponent
-  //     }
-  //   ]
-  // }
+  
 ];
 
 @NgModule({

@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { StockService } from '../../services/stock-services/stock.service';
 import { IStock } from '../../models/stock';
 import { Guid } from 'guid-typescript';
-import { CountContainersResponse } from '../../models/countContainersResponse';
+import { CountContainers } from '../../models/countContainers';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-expected-stock',
@@ -17,11 +18,11 @@ export class ExpectedStockComponent implements OnInit {
   
   constructor (private stockServ: StockService) {
     this.title = 'Сток ожидаемых'
-    this.subTitle = 'Мониторинг ожидаемых контейнеров'
+    this.subTitle = 'Мониторинг ожидаемых контейнеров';
   }
   
   stocks: IStock[] = []; 
-  countContainers = new CountContainersResponse();
+  countContainers = new CountContainers();
   
   ngOnInit(): void {
       this.loadStocks();
@@ -30,21 +31,16 @@ export class ExpectedStockComponent implements OnInit {
   // Loading of Stocks
   loadStocks(): void {
     this.stockServ.getStocks().subscribe(res => { this.stocks = res.data;
-      // for (let stock of this.stocks) {
-        
-      //   this.stockServ.getCountContainers(stock.id).subscribe(res => {
-      //     this.countContainers = res.data;
-      //     stock.emptyCntrsCount = this.countContainers.emptyCount;
-      //     stock.loadedCntrsCount = this.countContainers.loadedCount;
-      //   })
+      
+      for (let stock of this.stocks) {
+        this.stockServ.getCountContainers(stock.id).subscribe(res => {
+          this.countContainers = res.data;
+          stock.emptyCntrsCount = this.countContainers.emptyCount;
+          stock.loadedCntrsCount = this.countContainers.loadedCount;
+        })
 
-      // }
+      }
     });
-  }
-
-  public stockId: Guid | undefined;
-  openStock(id: Guid): void {
-    this.stockId = id;
   }
 
   isShowUnactive: boolean = false;

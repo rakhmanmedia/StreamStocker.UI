@@ -20,7 +20,6 @@ import { EmptyStockComponent } from './components/empty-stock/empty-stock.compon
 import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
-import { DataTablesModule } from 'angular-datatables';
 
 @NgModule({
   declarations: [
@@ -37,7 +36,6 @@ import { DataTablesModule } from 'angular-datatables';
     LoadedStockComponent,
     LayoutComponent,
     ExpectedStockDetailComponent,
-    
   ],
   imports: [
     BrowserModule,
@@ -45,7 +43,6 @@ import { DataTablesModule } from 'angular-datatables';
     HttpClientModule,
     RouterLink,
     RouterLinkActive,
-    DataTablesModule,
 
     JwtModule.forRoot({
       config: {

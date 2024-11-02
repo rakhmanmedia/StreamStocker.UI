@@ -1,6 +1,7 @@
-import { Component, HostBinding } from '@angular/core';
+import { AfterContentInit, Component, HostBinding, OnInit } from '@angular/core';
 import { TitleService } from '../../../services/titleService/title.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-sidebar',
@@ -10,18 +11,12 @@ import { Router } from '@angular/router';
 
 export class SidebarComponent {
 
-  @HostBinding('class') hostClass = 'sidebar dark:bg-coal-600 bg-light border-r border-r-gray-200 dark:border-r-coal-100 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0';
-	@HostBinding('attr.data-drawer') drawer = 'true';
-	@HostBinding('attr.data-drawer-class') drawerClass = 'drawer drawer-start top-0 bottom-0';
-	@HostBinding('attr.data-drawer-enable') drawerEnable = 'true|lg:false';
-	@HostBinding('attr.id') id = 'sidebar';
-
   stockerMenu = [
     {
       category: '', subcategories: [
         {
           name: "Dashboard", isAccordionShow: false, items: [
-            { name: 'Главная', link: '/dashboard' }
+            { name: 'Главная', link: 'dashboard', badge_soon: false }
           ]
         },
       ]
@@ -30,29 +25,31 @@ export class SidebarComponent {
       category: 'Основное', subcategories: [
         {
           name: "Стоки", isAccordionShow: false, items: [
-            { name: 'Сток ожидаемых', link: '/expected-stock' },
-            { name: 'Сток порожних', link: '/empty-stock' },
-            { name: 'Сток груженых', link: '/loaded-stock' }
+            { name: 'Сток ожидаемых', link: 'expected-stock', badge_soon: false },
+            { name: 'Сток порожних', link: 'empty-stock', badge_soon: true },
+            { name: 'Сток груженых', link: 'loaded-stock', badge_soon: true }
           ]
         }
       ]
     },
     {
-      category: 'Инструменты', subcategories: []
+      category: 'Инструменты', subcategories: [
+        { name: 'Справочники', isAccordionShow: false, items:[]}
+      ]
     }
   ];
 
   isAccordionShow: boolean = false
 
-  constructor (private titleServ: TitleService,
-    private router: Router) {
+  constructor(private titleServ: TitleService,
+    private router: Router, private location: Location) {
 
     // Show active menuItem
     this.stockerMenu.forEach(category => {
 
       category.subcategories.forEach(subcategory => {
-          subcategory.items.forEach(item => {
-          if (this.router.url.includes(item.link))
+        subcategory.items.forEach(item => {
+          if (this.location.path().includes(item.link))
             subcategory.isAccordionShow = true;
         })
       })
@@ -60,6 +57,6 @@ export class SidebarComponent {
   }
 
   clickMenuItem(itemName: string) {
-    this.titleServ.setTitle(itemName);   
+    this.titleServ.setTitle(itemName);
   }
 }

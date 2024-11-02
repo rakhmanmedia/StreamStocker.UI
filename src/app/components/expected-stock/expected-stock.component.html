@@ -138,7 +138,7 @@
                         </div>
             
                         <div class="card-footer justify-center">
-                            <a class="btn btn-dark btn-sm" routerLink="detail" (click)="openStock(stock.id)">
+                            <a class="btn btn-dark btn-sm" [routerLink]="[stock.id]">
                                 <i class="ki-filled ki-check-circle"></i>
                                 Открыть
                             </a>

@@ -1,44 +1,61 @@
-<ng-container><div class="sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0" id="sidebar_header">
-    <a class="dark:hidden" href="/metronic/tailwind/demo1/">
-     <img class="default-logo min-h-[22px] max-w-none" src="/static/metronic/tailwind/dist/assets/media/app/default-logo.svg">
-     <img class="small-logo min-h-[22px] max-w-none" src="/static/metronic/tailwind/dist/assets/media/app/mini-logo.svg">
-     <span class="text-lg font-medium text-inverse grow">
-        
-       </span>
-    </a>
-    <a class="hidden dark:block" href="/metronic/tailwind/demo1/">
-     <img class="default-logo min-h-[22px] max-w-none" src="/static/metronic/tailwind/dist/assets/media/app/default-logo-dark.svg">
-     <img class="small-logo min-h-[22px] max-w-none" src="/static/metronic/tailwind/dist/assets/media/app/mini-logo.svg">
-    </a>
-    <button class="btn btn-icon btn-icon-md size-[30px] rounded-lg border border-gray-200 dark:border-gray-300 bg-light text-gray-500 hover:text-gray-700 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4" data-toggle="body" data-toggle-class="sidebar-collapse" id="sidebar_toggle">
-     <i class="ki-filled ki-black-left-line toggle-active:rotate-180 transition-all duration-300">
-     </i>
-    </button>
-</div>
+<ng-container>
+    <div class="sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0"
+        id="sidebar_header">
+        <!-- <a class="dark:hidden" href="/metronic/tailwind/demo1/">
+            <img class="default-logo min-h-[22px] max-w-none"
+                src="/static/metronic/tailwind/dist/assets/media/app/default-logo.svg">
+            <img class="small-logo min-h-[22px] max-w-none"
+                src="/static/metronic/tailwind/dist/assets/media/app/mini-logo.svg">
+            <span class="text-lg font-medium text-inverse grow">
 
-<div class="sidebar-content flex grow shrink-0 py-5 pr-2" id="sidebar_content">
-    <div class="scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3" data-scrollable="true" data-scrollable-dependencies="#sidebar_header" data-scrollable-height="auto" data-scrollable-offset="0px" data-scrollable-wrappers="#sidebar_content" id="sidebar_scrollable">
-        <!-- Sidebar Menu -->
-        <div class="menu flex flex-col grow gap-0.5" data-menu="true" data-menu-accordion-expand-all="false" id="sidebar_menu">
+            </span>
+        </a>
+        <a class="hidden dark:block" href="/metronic/tailwind/demo1/">
+            <img class="default-logo min-h-[22px] max-w-none"
+                src="/static/metronic/tailwind/dist/assets/media/app/default-logo-dark.svg">
+            <img class="small-logo min-h-[22px] max-w-none"
+                src="/static/metronic/tailwind/dist/assets/media/app/mini-logo.svg">
+        </a> -->
+        <button
+            class="btn btn-icon btn-icon-md size-[30px] rounded-lg border border-gray-200 dark:border-gray-300 bg-light text-gray-500 hover:text-gray-700 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4"
+            data-toggle="body" data-toggle-class="sidebar-collapse" id="sidebar_toggle">
+            <i class="ki-filled ki-black-left-line toggle-active:rotate-180 transition-all duration-300">
+            </i>
+        </button>
+    </div>
 
-            <div *ngFor="let menu of stockerMenu">
+    <div class="sidebar-content flex grow shrink-0 py-5 pr-2" id="sidebar_content">
+        <div class="scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3" data-scrollable="true"
+            data-scrollable-dependencies="#sidebar_header" data-scrollable-height="auto" data-scrollable-offset="0px"
+            data-scrollable-wrappers="#sidebar_content" id="sidebar_scrollable">
+            <!-- Sidebar Menu -->
+            <div class="menu flex flex-col grow gap-0.5" data-menu="true" data-menu-accordion-expand-all="false"
+                id="sidebar_menu">
 
-                <div *ngIf="menu.category !=''" class="menu-item pt-2.25 pb-px">
-                    <span class="menu-heading uppercase text-2sm font-medium text-gray-500 pl-[10px] pr-[10px]">
+                @for (menu of stockerMenu; track $index) {
+                <div class="menu-item pt-2.25 pb-px">
+                    <span *ngIf="menu.category !=''"
+                        class="menu-heading uppercase text-2sm font-medium text-gray-500 ps-[10px] pe-[10px]">
                         {{menu.category}}
                     </span>
                 </div>
 
-                <div *ngFor="let subcategory of menu.subcategories" [class.show]="subcategory.isAccordionShow" [class.here]="subcategory.isAccordionShow" class="menu-item" data-menu-item-toggle="accordion" data-menu-item-trigger="click">
+                <div *ngFor="let subcategory of menu.subcategories" [class.show]="subcategory.isAccordionShow"
+                    [class.here]="subcategory.isAccordionShow" class="menu-item" data-menu-item-toggle="accordion"
+                    data-menu-item-trigger="click">
 
-                    <div class="menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]" tabindex="0">
+                    <div class="menu-link flex items-center grow cursor-pointer border border-transparent gap-[10px] pl-[10px] pr-[10px] py-[6px]"
+                        tabindex="0">
                         <span class="menu-icon items-start text-gray-500 dark:text-gray-400 w-[20px]">
                             <i *ngIf="subcategory.name=='Dashboard'" class="ki-filled ki-element-11 text-lg">
                             </i>
                             <i *ngIf="subcategory.name=='Стоки'" class="ki-filled ki-logistic text-lg">
                             </i>
+                            <i *ngIf="subcategory.name=='Справочники'" class="ki-filled ki-book-open text-lg">
+                            </i>
                         </span>
-                        <span class="menu-title text-sm font-medium text-gray-800 menu-item-active:text-primary menu-link-hover:!text-primary">
+                        <span
+                            class="menu-title text-sm font-medium text-gray-800 menu-item-active:text-primary menu-link-hover:!text-primary">
                             {{subcategory.name}}
                         </span>
                         <span class="menu-arrow text-gray-400 w-[20px] shrink-0 justify-end ml-1 mr-[-10px]">
@@ -50,24 +67,32 @@
                     </div>
 
                     <div class="menu-accordion gap-0.5 pl-[10px] relative before:absolute before:left-[20px] before:top-0 before:bottom-0 before:border-l before:border-gray-200">
-                 
-                        <div class="menu-item" *ngFor="let item of subcategory.items; let i = index" routerLinkActive="active">
-                            <a class="menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg gap-[14px] pl-[10px] pr-[10px] py-[8px]" tabindex="0" routerLink="{{item.link}}" (click)="clickMenuItem('Стоки')">
-                                <span class="menu-bullet flex w-[6px] relative before:absolute before:top-0 before:size-[6px] before:rounded-full before:-translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-primary menu-item-hover:before:bg-primary">
+
+                        <div class="menu-item" *ngFor="let item of subcategory.items; let i = index"
+                            routerLinkActive="active"> 
+                            <a class="menu-link border border-transparent items-center grow menu-item-active:bg-secondary-active dark:menu-item-active:bg-coal-300 dark:menu-item-active:border-gray-100 menu-item-active:rounded-lg hover:bg-secondary-active dark:hover:bg-coal-300 dark:hover:border-gray-100 hover:rounded-lg gap-[14px] pl-[10px] pr-[10px] py-[8px]"
+                                tabindex="0" routerLink="{{item.link}}" (click)="clickMenuItem('ggg')">
+                                <span
+                                    class="menu-bullet flex w-[6px] relative before:absolute before:top-0 before:size-[6px] before:rounded-full before:-translate-x-1/2 before:-translate-y-1/2 menu-item-active:before:bg-primary menu-item-hover:before:bg-primary">
                                 </span>
-                                <span class="menu-title text-2sm font-normal text-gray-800 menu-item-active:text-primary menu-item-active:font-semibold menu-link-hover:!text-primary">
+                                <span
+                                    class="menu-title text-2sm font-normal text-gray-800 menu-item-active:text-primary menu-item-active:font-semibold menu-link-hover:!text-primary">
                                     {{item.name}}
+                                </span>
+                                <span *ngIf="item.badge_soon" class="menu-badge me-[-10px]">
+                                    <span class="badge badge-xs">
+                                        Soon
+                                    </span>
                                 </span>
                             </a>
                         </div>
-                     
+
                     </div>
-    
+
                 </div>
+                }
             </div>
-               
+            <!-- End Sidebar Menu -->
         </div>
-        <!-- End Sidebar Menu -->
     </div>
-</div>
 </ng-container>
