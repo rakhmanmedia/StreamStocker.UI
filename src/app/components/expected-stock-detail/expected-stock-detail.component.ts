@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Guid } from 'guid-typescript';
 import DataTable, { Api } from 'datatables.net-dt';
 import 'datatables.net-select';
-import 'datatables.net-colreorder-dt';
+import 'datatables.net-colreorder';
 import { StockService } from '../../services/stock-services/stock.service';
 import { IStock } from '../../models/stock';
 

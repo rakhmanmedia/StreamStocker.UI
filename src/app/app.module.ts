@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AuthComponent } from './components/auth/auth.component';
 import { STOCKER_API_URL, STOCKER_AUTH_HEADER_OPT } from './app-injection-tokens';
 import { environment } from '../environments/environment.development';
@@ -20,51 +20,47 @@ import { EmptyStockComponent } from './components/empty-stock/empty-stock.compon
 import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
+import { DataTablesModule } from 'angular-datatables';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    AuthComponent,
-    SidebarComponent,
-    HeaderComponent,
-    Page404Component,
-    ContentComponent,
-    DashboardComponent,
-    FooterComponent,
-    ExpectedStockComponent,
-    EmptyStockComponent,
-    LoadedStockComponent,
-    LayoutComponent,
-    ExpectedStockDetailComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    RouterLink,
-    RouterLinkActive,
+@NgModule({ declarations: [
+        AppComponent,
+        AuthComponent,
+        SidebarComponent,
+        HeaderComponent,
+        Page404Component,
+        ContentComponent,
+        DashboardComponent,
+        FooterComponent,
+        ExpectedStockComponent,
+        EmptyStockComponent,
+        LoadedStockComponent,
+        LayoutComponent,
+        ExpectedStockDetailComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        RouterLink,
+        RouterLinkActive,
+        DataTablesModule,
 
-    JwtModule.forRoot({
-      config: {
-        tokenGetter: () => {
-          return localStorage.getItem(ACCESS_TOKEN_KEY);
+        JwtModule.forRoot({
+            config: {
+                tokenGetter: () => {
+                    return localStorage.getItem(ACCESS_TOKEN_KEY);
+                },
+                allowedDomains: environment.whiteListedDomains
+            }
+        })], providers: [
+        {
+            provide: STOCKER_API_URL,
+            useValue: environment.stockerApi
         },
-        allowedDomains: environment.whiteListedDomains
-      }
-    })
-  ],
-  providers: [
-    { 
-      provide: STOCKER_API_URL,
-      useValue: environment.stockerApi
-    },
-    {
-      provide: STOCKER_AUTH_HEADER_OPT,
-      useValue: environment.stokerAuthHeaderOpt
-    }
-  ],
-  bootstrap: [AppComponent]
-})
+        {
+            provide: STOCKER_AUTH_HEADER_OPT,
+            useValue: environment.stokerAuthHeaderOpt
+        },
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 
 export class AppModule { 
 
