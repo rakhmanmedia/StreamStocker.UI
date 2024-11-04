@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -21,8 +21,11 @@ import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.com
 import { LayoutComponent } from './core/components/layout/layout.component';
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
 import { DataTablesModule } from 'angular-datatables';
+import { SearchLookupComponent } from './core/elements/search-lookup/search-lookup.component';
+import { createCustomElement } from '@angular/elements';
 
-@NgModule({ declarations: [
+@NgModule({
+    declarations: [
         AppComponent,
         AuthComponent,
         SidebarComponent,
@@ -36,8 +39,10 @@ import { DataTablesModule } from 'angular-datatables';
         LoadedStockComponent,
         LayoutComponent,
         ExpectedStockDetailComponent,
+        SearchLookupComponent,
     ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+    bootstrap: [AppComponent],
+    imports: [BrowserModule,
         AppRoutingModule,
         RouterLink,
         RouterLinkActive,
@@ -51,18 +56,18 @@ import { DataTablesModule } from 'angular-datatables';
                 allowedDomains: environment.whiteListedDomains
             }
         })], providers: [
-        {
-            provide: STOCKER_API_URL,
-            useValue: environment.stockerApi
-        },
-        {
-            provide: STOCKER_AUTH_HEADER_OPT,
-            useValue: environment.stokerAuthHeaderOpt
-        },
-        provideHttpClient(withInterceptorsFromDi())
-    ] })
+            {
+                provide: STOCKER_API_URL,
+                useValue: environment.stockerApi
+            },
+            {
+                provide: STOCKER_AUTH_HEADER_OPT,
+                useValue: environment.stokerAuthHeaderOpt
+            },
+            provideHttpClient(withInterceptorsFromDi())
+        ]
+})
 
-export class AppModule { 
-
+export class AppModule {
 }
 

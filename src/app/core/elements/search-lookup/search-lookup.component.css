@@ -1,0 +1,41 @@
+.dropdown-box .selected-item,
+.dropdown-box .selected-item input {
+    cursor: pointer;
+}
+
+.dropdown-box {
+    position: relative;
+}
+
+.dropdown-content-1 { 
+    width: 100%;
+    background-color: var(--tw-dropdown-background-color);
+    box-shadow: var(--tw-dropdown-box-shadow);
+}
+
+.dropdown-box .dropdown-content-1 {
+    display: none;
+    position: absolute;
+}
+
+.dropdown-box.open .dropdown-content-1 {
+    display: block;
+}
+
+.dropdown-box .dropdown-content-1 ul li {
+    cursor: pointer;
+}
+
+.dropdown-box .dropdown-content-1 ul li.hide {
+    display: none;
+}
+
+.dropdown-box .dropdown-content-1 ul li.active{
+    color: var(--tw-gray-100-light);
+    background-color: var(--tw-gray-500);
+}
+
+.dropdown-box .dropdown-content-1 ul li:hover {
+    color: var(--tw-gray-100-light);
+    background-color: var(--tw-primary);
+}

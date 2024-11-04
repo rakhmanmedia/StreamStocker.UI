@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { StockDetailService } from '../../services/stock-services/stock-detail.service';
 import { IExpectedStock } from '../../models/expected-stock';
 import { ActivatedRoute } from '@angular/router';
@@ -8,6 +8,7 @@ import 'datatables.net-select';
 import 'datatables.net-colreorder';
 import { StockService } from '../../services/stock-services/stock.service';
 import { IStock } from '../../models/stock';
+import { SearchLookupComponent } from '../../core/elements/search-lookup/search-lookup.component';
 
 @Component({
   selector: 'app-expected-stock-detail',
@@ -16,26 +17,23 @@ import { IStock } from '../../models/stock';
 })
 export class ExpectedStockDetailComponent implements OnInit {
 
+  @ViewChild(SearchLookupComponent) searchLookupContainers: SearchLookupComponent<IStock>;
+
   expectedStocks: IExpectedStock[] = [];
   currentStock: IStock;
-  private id: Guid;
+  private stockId: Guid;
   loadedCount: number = 0;
   emptyCount: number = 0;
 
   datatable: Api<any>;
 
   constructor(private stockDetailServ: StockDetailService, private stockServ: StockService, activateRoute: ActivatedRoute) {
-    this.id = activateRoute.snapshot.params['id'];
+    this.stockId = activateRoute.snapshot.params['id'];
   }
 
   ngOnInit(): void {
-
-    // loading current stock data
-    console.log(this.id);
-    this.stockServ.getStock(this.id).subscribe(async resp => { console.log(resp.data); this.currentStock = await resp.data; console.log(this.currentStock) });
-    console.log(this.currentStock);
     
-
+    // need create service
     DataTable.ext.classes.length.select = 'select select-sm w-16';
     DataTable.ext.classes.paging.container = 'pagination';
     DataTable.ext.classes.paging.button = 'btn';
@@ -43,13 +41,26 @@ export class ExpectedStockDetailComponent implements OnInit {
     DataTable.ext.classes.table = 'table table-auto table-border align-middle text-gray-700 font-medium text-sm';
     DataTable.ext.classes.layout.tableRow = 'scrollable-x-auto';
 
-    this.OnLoad();
+    // loading current stock data
+    this.stockServ.getStock(this.stockId).subscribe(resp => { 
+
+      if (resp.data != null)
+      {
+        this.currentStock = resp.data; 
+        this.OnLoad();
+      }
+    }, 
+    error => {
+
+    });  
+    
+    setTimeout(() => {
+      this.searchLookupContainers.source = this.currentStock;
+    }, 100); 
   }
 
   // Loading Expected Stocks
   private OnLoad(): void {
-
-    
 
     this.datatable = new DataTable('#datatable_1', {
       processing: true,
@@ -169,17 +180,21 @@ export class ExpectedStockDetailComponent implements OnInit {
       // loading data
       ajax: (dataTablesParameters: any, callback) => {
         setTimeout(() => {
-          this.stockDetailServ.getStockDetail(this.id).subscribe(resp => {
+          this.stockDetailServ.getStockDetail(this.stockId).subscribe(resp => {
+            console.log('test');
+            
             this.expectedStocks = resp.data;
-            this.loadedCount = resp.data.filter(el => el.state == 1 && el.stockId == this.id).length;
-            this.emptyCount = resp.data.filter(el => el.state == 0 && el.stockId == this.id).length;
+            this.loadedCount = resp.data.filter(el => el.state == 1 && el.stockId == this.stockId).length;
+            this.emptyCount = resp.data.filter(el => el.state == 0 && el.stockId == this.stockId).length;
             callback({
               data: resp.data,
             });
           })
-        }, 1500);
+        }, 500);
         
       },
+
+      
     });
   }
 

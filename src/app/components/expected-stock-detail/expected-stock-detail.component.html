@@ -3,13 +3,13 @@
     .hero-bg {
       background-image: url('../../../assets/media/images/2600x1200/bg-1.png');
     }
-  
+
     .dark .hero-bg {
       background-image: url('/src/assets/media/images/2600x1200/bg-1-dark.png');
     }
   </style>
 
-  <div class="bg-center bg-cover bg-no-repeat hero-bg">
+  <div *ngIf="currentStock != null" class="bg-center bg-cover bg-no-repeat hero-bg">
     <div class="container-fixed">
       <div class="flex flex-col items-center gap-2 lg:gap-3.5 py-4 lg:pt-5 lg:pb-10">
         <i class="ki-filled ki-parcel text-2xl text-primary"></i>
@@ -141,34 +141,38 @@
                 </th>
               </tr>
             </thead>
-            <thead><tr>
-              <th class="w-14"></th>
-              <th class="min-w-60px]">
-                <div class="input input-sm">
-                  <input placeholder="Контейнер" data-index="2" type="text" value="" #container (keyup)="filterOnColumn(container)">
-                </div>
-              </th>
-              <th class="min-w-[60px]">
-                <div class="input input-sm">
-                  <input placeholder="Тип" data-index="3" type="text" value="" #type (keyup)="filterOnColumn(type)">
-                </div>
-              </th>
-              <th class="min-w-60px">
-                <div class="input input-sm">
-                  <input placeholder="Состояние" data-index="4" type="text" value="" #state (keyup)="filterOnColumn(state)">
-                </div>
-              </th>
-              <th>
-                <label class="input input-sm">
-                  <input placeholder="Дата" data-index="5" type="text" value="" #date (keyup)="filterOnColumn(date)">
-                </label>
-              </th>
-              <th></th>
-              <th></th>
-            </tr></thead>
+            <thead>
+              <tr>
+                <th class="w-14"></th>
+                <th class="min-w-60px]">
+                  <div class="input input-sm">
+                    <input placeholder="Контейнер" data-index="2" type="text" value="" #container
+                      (keyup)="filterOnColumn(container)">
+                  </div>
+                </th>
+                <th class="min-w-[60px]">
+                  <div class="input input-sm">
+                    <input placeholder="Тип" data-index="3" type="text" value="" #type (keyup)="filterOnColumn(type)">
+                  </div>
+                </th>
+                <th class="min-w-60px">
+                  <div class="input input-sm">
+                    <input placeholder="Состояние" data-index="4" type="text" value="" #state
+                      (keyup)="filterOnColumn(state)">
+                  </div>
+                </th>
+                <th>
+                  <label class="input input-sm">
+                    <input placeholder="Дата" data-index="5" type="text" value="" #date (keyup)="filterOnColumn(date)">
+                  </label>
+                </th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
             <tbody></tbody>
             <tfoot>
-              
+
             </tfoot>
           </table>
         </div>
@@ -180,63 +184,68 @@
 <!-- Modal Add Stock -->
 <div class="modal open" data-modal="true" id="add_container_modal" style="z-index: 90;">
   <div class="modal-content max-w-[700px] top-[15%]">
-      <div class="modal-header pr-2.5">
-          <h3 class="modal-title">
-              Новый контейнер
-          </h3>
-          <button class="btn btn-sm btn-icon btn-light btn-clear shrink-0" data-modal-dismiss="true">
-              <i class="ki-filled ki-black-left">
-              </i>
-          </button>
+    <div class="modal-header pr-2.5">
+      <h3 class="modal-title">
+        Новый контейнер
+      </h3>
+      <button class="btn btn-sm btn-icon btn-light btn-clear shrink-0" data-modal-dismiss="true">
+        <i class="ki-filled ki-black-left">
+        </i>
+      </button>
+    </div>
+    <div class="modal-body grid gap-5 px-0 py-5">
+      <div class="flex flex-col px-5 gap-2.5">
+
+        <label class="form-label font-normal text-gray-900">
+          Контейнер:
+        </label>
+        <input class="input" placeholder="Введите номер контейнера" #email type="text" value="" />
+        <label class="form-label font-normal text-gray-900" aria-disabled="true">
+          Тип:
+        </label>
+        <input class="input" disabled #email type="text" value="" />
+        <label class="form-label font-normal text-gray-900">
+          Состояние:
+        </label>
+        <input class="input" placeholder="Введите состояние контейнера" #email type="text" value="" />
+        <label class="form-label font-normal text-gray-900">
+          Место:
+        </label>
+        <input class="input" placeholder="Введите наименование места" #email type="" value="" />
+        <select class="select">
+          <option id="" disabled selected>Test</option>
+          <option id="">Test1</option>
+          <option id="">Test2</option>
+          <option id="">Test3</option>
+          <option id="">Test4</option>
+        </select>
+
+
+        <input class="input" list="test-list">
+        <datalist id="test-list">
+          <option id="">Test1</option>
+          <option id="">Test2</option>
+          <option id="">Test3</option>
+          <option id="">Test4</option>
+        </datalist>
+
+        <label class="form-label font-normal text-gray-900">
+          Контейнер:
+        </label>
+        <app-search-lookup></app-search-lookup>
+        
       </div>
-      <div class="modal-body grid gap-5 px-0 py-5">
-          <div class="flex flex-col px-5 gap-2.5">
 
-              <label class="form-label font-normal text-gray-900">
-                  Контейнер:
-              </label>
-              <input class="input" placeholder="Введите номер контейнера" #email type="text" value="" />
-              <label class="form-label font-normal text-gray-900">
-                  Хранитель:
-              </label>
-              <input class="input" placeholder="Введите наименование хранителя" #email type="text" value="" />
-              <label class="form-label font-normal text-gray-900">
-                  Судовладелец:
-              </label>
-              <input class="input" placeholder="Введите наименование судовладельца" #email type="text" value="" />
-              <label class="form-label font-normal text-gray-900">
-                  Место:
-              </label>
-              <input class="input" placeholder="Введите наименование места" #email type="" value="" />
-              <select class="select">
-                  <option id="" disabled selected>Test</option>
-                  <option id="" >Test1</option>
-                  <option id="" >Test2</option>
-                  <option id="" >Test3</option>
-                  <option id="" >Test4</option>
-              </select>
-
-              <input class="input" list="test-list">
-              <datalist id="test-list"><option id="" >Test1</option>
-                  <option id="" >Test2</option>
-                  <option id="" >Test3</option>
-                  <option id="" >Test4</option>
-                </datalist>
-          </div>
-
-          <div class="border-b border-b-gray-200">
-          </div>
-
-          <div class="flex flex-col-2 px-5 gap-2">
-              <button class="btn btn-primary justify-center">
-                  Добавить
-              </button>
-              <button class="btn btn-light justify-center">
-                  Отмена
-              </button>
-          </div>
-
+      <div class="flex flex-col-2 px-5 gap-2">
+        <button class="btn btn-primary justify-center">
+          Добавить
+        </button>
+        <button class="btn btn-light justify-center">
+          Отмена
+        </button>
       </div>
+
+    </div>
   </div>
 </div>
 <!-- Modal Add Stock -->
