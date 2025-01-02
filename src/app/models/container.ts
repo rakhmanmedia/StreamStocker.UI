@@ -1,8 +1,9 @@
 import { Guid } from "guid-typescript";
-import { ITypeContainer } from "./typeContainer";
+import { TypeContainer } from "./typeContainer";
 
-export interface IContainer {
+export class Container {
     id: Guid;
     number: string;
-    typeContainer: ITypeContainer
+    typeContainerId: Guid;
+    typeContainer: TypeContainer;
 }

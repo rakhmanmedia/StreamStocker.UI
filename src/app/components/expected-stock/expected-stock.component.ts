@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { StockService } from '../../services/stock-services/stock.service';
-import { IStock } from '../../models/stock';
-import { Guid } from 'guid-typescript';
+import { Stock } from '../../models/stock';
 import { CountContainers } from '../../models/countContainers';
-import { ActivatedRoute } from '@angular/router';
+import { InitializeScriptService } from '../../services/initializer-services/initialize-script.service';
+import { StockDetailService } from '../../services/stock-services/stock-detail.service';
 
 @Component({
   selector: 'app-expected-stock',
@@ -11,25 +11,35 @@ import { ActivatedRoute } from '@angular/router';
   styleUrl: './expected-stock.component.css'
 })
 
-export class ExpectedStockComponent implements OnInit {
+export class ExpectedStockComponent implements OnInit, AfterViewInit {
 
   readonly title: string;
   readonly subTitle: string;
   
-  constructor (private stockServ: StockService) {
+  constructor (
+    private stockServ: StockService,
+    private initScriptServ: InitializeScriptService
+  ) {
     this.title = 'Сток ожидаемых'
     this.subTitle = 'Мониторинг ожидаемых контейнеров';
   }
+  ngAfterViewInit(): void {
+    this.initScriptServ.loadScript('./assets/js/core.bundle.js')
+    .then(() => 
+      console.log('Скрипт core.bundle.js загружен и готов к использованию.'))
+    .catch((error) => 
+      console.log(`При загружке скрипта core.bundle.js произошла ошибка: ${error}`));
+  }
   
-  stocks: IStock[] = []; 
+  stocks: Stock[] = []; 
   countContainers = new CountContainers();
   
   ngOnInit(): void {
-      this.loadStocks();
+      this.onLoadStocks();
   }
 
   // Loading of Stocks
-  loadStocks(): void {
+  onLoadStocks(): void {
     this.stockServ.getStocks().subscribe(res => { this.stocks = res.data;
       
       for (let stock of this.stocks) {
@@ -38,7 +48,6 @@ export class ExpectedStockComponent implements OnInit {
           stock.emptyCntrsCount = this.countContainers.emptyCount;
           stock.loadedCntrsCount = this.countContainers.loadedCount;
         })
-
       }
     });
   }

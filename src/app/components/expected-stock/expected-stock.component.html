@@ -53,7 +53,9 @@
             <div class="flex flex-col gap-5 lg:gap-7.5" id="team_crew_card">
                 <div class="grid grid-cols-1 xl:grid-cols-2  gap-5 lg:gap-7.5">
             
-                    <div *ngFor="let stock of stocks" class="card" [class.hidden]="!isShowUnactive && (stock.emptyCntrsCount == 0 && stock.loadedCntrsCount == 0)" [class.show]="stock.emptyCntrsCount > 0 && stock.loadedCntrsCount > 0">
+                    <div *ngFor="let stock of stocks" [hidden]="!isShowUnactive && (stock.emptyCntrsCount == 0 && stock.loadedCntrsCount == 0)">
+
+                        <div class="card">
             
                         <div class="card-body lg:pt-9 lg:pb-7.5">
             
@@ -143,6 +145,8 @@
                                 Открыть
                             </a>
                         </div>
+
+                    </div>
             
                     </div>
             
@@ -259,7 +263,7 @@
                                             <td class="text-gray-800 font-normal">{{stock.shipOwner.name}}</td>
                                             <td class="text-gray-800 font-normal">{{stock.keeper.name}}</td>
                                             <td class="text-gray-800 font-normal">{{stock.agent.name}}</td>
-                                            <td class="text-gray-800 font-normal">{{stock.loadedCntrsCount}} / {{stock.emptyCntrsCount}}</td>
+                                            <td class="text-gray-800 font-normal"><span class="badge badge-success badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-success me-1.5"></span>{{stock.loadedCntrsCount}}</span> / <span class="badge badge-danger badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-danger me-1.5"></span>{{stock.emptyCntrsCount}}</span></td>
                                             <td class="text-center">
                                                 <a class="btn btn-dark btn-sm">
                                                     <i class="ki-filled ki-check-circle"></i>

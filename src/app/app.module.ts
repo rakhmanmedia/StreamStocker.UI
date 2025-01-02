@@ -22,7 +22,11 @@ import { LayoutComponent } from './core/components/layout/layout.component';
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
 import { DataTablesModule } from 'angular-datatables';
 import { SearchLookupComponent } from './core/elements/search-lookup/search-lookup.component';
-import { createCustomElement } from '@angular/elements';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ContainerValidatorDirective } from './directives/container-validator.directive';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { PreloaderComponent } from './core/components/preloader/preloader.component';
 
 @NgModule({
     declarations: [
@@ -40,13 +44,25 @@ import { createCustomElement } from '@angular/elements';
         LayoutComponent,
         ExpectedStockDetailComponent,
         SearchLookupComponent,
+        ContainerValidatorDirective,
+        PreloaderComponent,
     ],
     bootstrap: [AppComponent],
-    imports: [BrowserModule,
+    imports: [
+        BrowserModule,
         AppRoutingModule,
         RouterLink,
         RouterLinkActive,
         DataTablesModule,
+        FormsModule,
+        ReactiveFormsModule,
+        BrowserAnimationsModule,
+        ToastrModule.forRoot({
+            positionClass: 'toast-bottom-right',
+            closeButton: true,
+            timeOut: 5000,
+            preventDuplicates: true,
+          }),
 
         JwtModule.forRoot({
             config: {
@@ -70,4 +86,3 @@ import { createCustomElement } from '@angular/elements';
 
 export class AppModule {
 }
-

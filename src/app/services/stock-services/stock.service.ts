@@ -5,7 +5,7 @@ import { Observable, tap } from 'rxjs';
 import { IBaseResponse } from '../../models/baseResponse';
 import { ACCESS_TOKEN_KEY } from '../auth.service';
 import { Guid } from 'guid-typescript';
-import { IStock } from '../../models/stock';
+import { Stock } from '../../models/stock';
 import { CountContainers } from '../../models/countContainers';
 
 @Injectable({
@@ -18,15 +18,15 @@ export class StockService {
     @Inject(STOCKER_AUTH_HEADER_OPT) private stokerAuthHeaderOpt: {}
   ) { }
 
-  getStock(id: Guid): Observable<IBaseResponse<IStock>> {
-    return this.http.get<IBaseResponse<IStock>>(`${this.stokerApi}/api/stock/get-stock`, { headers: new HttpHeaders({'id': id.toString()}) });
+  getStock(id: Guid): Observable<IBaseResponse<Stock>> {
+    return this.http.get<IBaseResponse<Stock>>(`${this.stokerApi}/api/stock/get-stock`, { headers: new HttpHeaders({'id': id.toString()}) });
   }
 
-  getStocks(): Observable<IBaseResponse<IStock[]>> {
+  getStocks(): Observable<IBaseResponse<Stock[]>> {
 
     const headersOption =  { headers: new HttpHeaders({ 'Authorization': 'Bearer ' + localStorage.getItem(ACCESS_TOKEN_KEY) }) }
 
-    return this.http.get<IBaseResponse<IStock[]>>(`${this.stokerApi}/api/stock/get-all-stocks`, this.stokerAuthHeaderOpt);
+    return this.http.get<IBaseResponse<Stock[]>>(`${this.stokerApi}/api/stock/get-all-stocks`, this.stokerAuthHeaderOpt);
   }
 
   getCountContainers(stockId: Guid): Observable<IBaseResponse<CountContainers>> {

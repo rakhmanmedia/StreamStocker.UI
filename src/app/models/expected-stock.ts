@@ -1,11 +1,12 @@
 import { Guid } from "guid-typescript";
-import { IContainer } from "./container";
+import { Container } from "./container";
 
-export interface IExpectedStock{
+export class ExpectedStock{
     id: Guid;
     stockId: Guid;
-    container: IContainer,
-    state: number,
-    status: number,
-    applicationDate: Date
+    containerId: string;
+    container: Container = new Container();
+    state: number;
+    status: number;
+    applicationDate: string = new Date().toISOString().slice(0, 10);
 }

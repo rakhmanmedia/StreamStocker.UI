@@ -26,6 +26,10 @@
     cursor: pointer;
 }
 
+li {
+    cursor: pointer;
+}
+
 .dropdown-box .dropdown-content-1 ul li.hide {
     display: none;
 }

@@ -26,6 +26,8 @@ export class SidebarComponent {
         {
           name: "Стоки", isAccordionShow: false, items: [
             { name: 'Сток ожидаемых', link: 'expected-stock', badge_soon: false },
+            { name: 'Удаленные', link: 'deleted', badge_soon: true },
+            { name: 'Переадресованные', link: 'redirected', badge_soon: true },
             { name: 'Сток порожних', link: 'empty-stock', badge_soon: true },
             { name: 'Сток груженых', link: 'loaded-stock', badge_soon: true }
           ]
