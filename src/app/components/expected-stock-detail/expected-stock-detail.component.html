@@ -485,6 +485,17 @@
                       <div class="flex items-center flex-wrap justify-between gap-5">
                         <div class="flex items-center gap-5">
                           <div class="flex flex-col justify-center gap-2">
+                            <span>Уже есть в БД:</span>
+                          </div>
+                          <div class="flex justify-center">
+                            <span class="text-gray-900 text-sm leading-none font-medium">{{checkImportDataResult.alreadyExistRows}}</span>
+                          </div>
+                        </div>  
+                      </div>
+
+                      <div class="flex items-center flex-wrap justify-between gap-5">
+                        <div class="flex items-center gap-5">
+                          <div class="flex flex-col justify-center gap-2">
                             <span>В удаленных:</span>
                           </div>
                           <div class="flex justify-center">
@@ -541,7 +552,7 @@
 
             <div class="flex items-center flex-wrap justify-between gap-2">
             
-              <div class="flex flex-col gap-2.5">
+              <!-- <div class="flex flex-col gap-2.5">
                 <label class="switch switch-sm">
                   <span class="switch-label">
                     <span class="switch-on:hidden">Порожние</span>
@@ -549,16 +560,14 @@
                   </span>
                   <input name="check" type="checkbox" value="0" [(ngModel)]="isloadedCntr">
                 </label>
-              </div>
+              </div> -->
 
-              <div class="flex flex-col gap-2.5">
-                <label class="switch switch-sm">
-                  <span class="switch-label">
-                    <span>Порожние</span>
-                    <span>Груженые</span>
-                  </span>
-                  <input name="check" type="checkbox" value="0" [(ngModel)]="isloadedCntr" >
-                </label>
+              <div class="w-48">
+                <select class="select select-sm" [(ngModel)]="stateCntr" (change)="onStateCntrChange()">
+                  <option value="neutral" [disabled]="stateCntr!='neutral'">Выберете состояние</option>
+                  <option value="empty">Порожний</option>
+                  <option value="loaded">Груженый</option>
+                </select>
               </div>
             
               <div class="flex flex-col gap-2.5"><label class="checkbox-group"><input type="checkbox" class="checkbox checkbox-sm"
@@ -576,7 +585,7 @@
             </div>
 
             <div class="flex flex-col-2 gap-2">
-              <button type="button" class="btn btn-success justify-center" [disabled]="checkImportDataResult.validRows == 0 && !isImportInvalidDigit" (click)="onImportData(checkImportDataResult)" data-modal-dismiss="true">
+              <button type="button" class="btn btn-success justify-center" [disabled]="(checkImportDataResult.validRows == 0 && !isImportInvalidDigit) || stateCntr =='neutral'" (click)="onImportData(checkImportDataResult)" data-modal-dismiss="true">
                 Загрузить
               </button>
               <button class="btn btn-light justify-center">

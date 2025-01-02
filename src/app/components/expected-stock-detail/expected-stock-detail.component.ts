@@ -483,13 +483,30 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.datatable.column(object.getAttribute('data-index')).search(object.value).draw();
   }
 
-  state: 'empty' | 'loaded' | 'neutral' = 'neutral';
+  stateCntr: 'empty' | 'loaded' | 'neutral' = 'neutral';
 
-  toogleState(): void {
-    if (this.state == 'neutral')
-      this.state = 'empty';
-    else if (this.state == 'empty')
-      this.state = 'loaded';
-    else this.state = 'neutral';
+  toggleState(): void {
+    if (this.stateCntr == 'neutral')
+      this.stateCntr = 'empty';
+    else if (this.stateCntr == 'empty')
+      this.stateCntr = 'loaded';
+    else this.stateCntr = 'neutral';
+  }
+
+  onIsLoadedCntrChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.isloadedCntr = input.checked ? true : input.indeterminate ? null : false;
+  }
+
+  onStateCntrChange(): void {
+    console.log(this.stateCntr);
+    switch (this.stateCntr) {
+      case 'empty':
+        this.isloadedCntr = false;
+        break;
+      case 'loaded':
+        this.isloadedCntr = true;
+        break;
+    }
   }
 }
