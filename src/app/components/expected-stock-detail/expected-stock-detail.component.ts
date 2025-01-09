@@ -14,7 +14,7 @@ import { TypeContainer } from '../../models/typeContainer';
 import { ToastrService } from 'ngx-toastr';
 import { InitializeScriptService } from '../../services/initializer-services/initialize-script.service';
 import { forkJoin } from 'rxjs';
-import { error, event } from 'jquery';
+import { error } from 'jquery';
 import { ImportContainerResult } from '../../models/importContainerResult';
 
 @Component({
@@ -66,10 +66,6 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.expectedStock.applicationDate = new Date().toISOString().slice(0, 10);
   }
 
-
-  
-  
-
   ngAfterViewInit(): void {
     setTimeout(() => {
       // Инициализация скрипта core.bundle.js
@@ -118,9 +114,12 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     });
   }
 
+  stateContaner: string = '';
   onSubmit(): void {
 
-    this.stockDetailServ.addContainerToStock(this.expectedStock).subscribe(
+    console.log(this.stateContaner);
+
+    this.stockDetailServ.addContainerToStock(this.expectedStock, this.stateContaner).subscribe(
       resp => { 
         console.log(resp); 
         this.loadData();
@@ -236,7 +235,6 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   private exportToCSV(data: any, fileName: string = 'export.csv'): void {
     const bom = '\uFEFF'; // BOM для UTF-8
     const blob= new Blob([bom + data], { type: 'text/csv;charset=utf-8;' });
-    console.log(blob);
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'exported_data.csv';
@@ -290,7 +288,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.isApplicationDateFilterActive = false;
     this.loadData();
   }
-
+  // Инициализация DataTable
   private initializeDataTable(data: any[]): void {
 
     const configDataTable: Config = {
@@ -338,10 +336,19 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
         { data: 'container.number', },
         { data: 'container.typeContainer.name', },
         {
-          data: 'state', render: function (data) {
-            if (data == 0)
-              return `<span class="badge badge-danger badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-danger me-1.5"></span>Порожний</span>`
-            else return `<span class="badge badge-success badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-success me-1.5"></span>Груженый</span>`
+          data: 'container.containerStates', render: function(data) {
+            if (data.length>0) {
+              let lastState = data[data.length - 1].stateContainer.toString();
+              switch (lastState) {
+                case 'Loaded':
+                  return `<span class="badge badge-success badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-success me-1.5"></span>Груженый</span>`
+                case 'Empty':
+                  return `<span class="badge badge-danger badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-danger me-1.5"></span>Порожний</span>`
+                default:
+                  return `<span class="badge badge-warning badge-outline rounded-[30px]"><span class="badge badge-dot badge-warning size-1.5 me-1.5"></span>Неизвестно</span>`;
+              }
+            }
+            else return `<span class="badge badge-warning badge-outline rounded-[30px]"><span class="badge badge-dot badge-warning size-1.5 me-1.5"></span>Неизвестно</span>`;
           }
         },
         {
@@ -359,20 +366,6 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
             else return `<span class="badge badge-sm">WAIL</span>`
           }
         },
-        // {
-        //   data: null,
-        //   className: 'text-center',
-        //   render: function () {
-        //     return `<a class="btn btn-sm btn-icon btn-clear btn-light" href="#"><i class="ki-outline ki-notepad-edit"></i></a>`
-        //   }
-        // },
-        // {
-        //   data: null,
-        //   className: 'text-center',
-        //   render: function () {
-        //     return `<a class="btn btn-sm btn-icon btn-clear btn-light" href="#"><i class="ki-outline ki-trash"></i></a>`
-        //   }
-        // }
       ],
 
       select: {

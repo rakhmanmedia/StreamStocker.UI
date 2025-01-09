@@ -1,9 +1,8 @@
 import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ExpectedStockComponent } from './components/expected-stock/expected-stock.component';
-import { LayoutComponent } from './core/components/layout/layout.component';
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
 import { Page404Component } from './components/page-404/page-404.component';
 
@@ -15,8 +14,6 @@ const routes: Routes = [
   { path: 'expected-stock/:id', component: ExpectedStockDetailComponent },
   { path: 'expected-stock/detail', component: ExpectedStockDetailComponent },
   { path: '**', component: Page404Component }
-
-  
 ];
 
 @NgModule({

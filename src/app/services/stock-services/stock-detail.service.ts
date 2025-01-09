@@ -20,8 +20,9 @@ export class StockDetailService {
     return this.http.get<IBaseResponse<ExpectedStock[]>>(`${this.stokerApi}/api/expectedstock/get-expected-stock-bystockid`, { headers: new HttpHeaders({'stockId': stockId.toString()}) });
   }
 
-  addContainerToStock(expectedStockDetail: ExpectedStock): Observable<IBaseResponse<boolean>> {
-    return this.http.post<IBaseResponse<boolean>>(`${this.stokerApi}/api/expectedstock/add-stock`, expectedStockDetail);    
+  addContainerToStock(expectedStockDetail: ExpectedStock, state: string): Observable<IBaseResponse<boolean>> {
+    const params = {state: state}
+    return this.http.post<IBaseResponse<boolean>>(`${this.stokerApi}/api/expectedstock/add-stock`, expectedStockDetail, {params});    
   }
 
   // Отправка запроса на сервер пометить на удаление

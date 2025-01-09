@@ -372,11 +372,11 @@
               </div> -->
   
               <label class="form-label font-normal text-gray-900">Состояние:</label>
-              <select class="select" name="state" [(ngModel)]="expectedStock.state" (change)="setStatus()"
+              <select class="select" name="state" [(ngModel)]="stateContaner" (change)="setStatus()"
                 #state="ngModel" required>
                 <option id="" disabled selected>Выберете состояние</option>
-                <option id="" value="0">Порожний</option>
-                <option id="" value="1">Груженый</option>
+                <option id="" value="empty">Порожний</option>
+                <option id="" value="loaded">Груженый</option>
               </select>
               <div class="text-danger text-2sm" *ngIf="state.invalid && (state.touched || state.dirty)">
                 <span *ngIf="state.errors?.['required']">Поле обязательно для заполнения.</span>
