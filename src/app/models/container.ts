@@ -8,4 +8,6 @@ export class Container {
     typeContainerId: Guid;
     typeContainer: TypeContainer;
     containerStates: ContainerState[];
+    currentStateId: Guid;
+    currentState: ContainerState;
 }

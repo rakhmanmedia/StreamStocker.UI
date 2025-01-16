@@ -6,16 +6,18 @@ import { Guid } from 'guid-typescript';
 import { StockService } from '../../services/stock-services/stock.service';
 import { Stock } from '../../models/stock';
 import { SearchLookupComponent } from '../../core/elements/search-lookup/search-lookup.component';
-import DataTable, { Api, Config } from 'datatables.net-dt';
+//import DataTable, { Api, Config } from 'datatables.net-dt';
+import DataTable, { Api, Config } from 'datatables.net';
 import 'datatables.net-select';
 import 'datatables.net-colreorder';
 import { TypeContainerService } from '../../services/typeContainer-services/type-container.service';
 import { TypeContainer } from '../../models/typeContainer';
 import { ToastrService } from 'ngx-toastr';
 import { InitializeScriptService } from '../../services/initializer-services/initialize-script.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { error } from 'jquery';
 import { ImportContainerResult } from '../../models/importContainerResult';
+import { Container } from '../../models/container';
 
 @Component({
   selector: 'app-expected-stock-detail',
@@ -26,7 +28,7 @@ import { ImportContainerResult } from '../../models/importContainerResult';
 export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
 
   @ViewChild(SearchLookupComponent) searchLookupContainers: SearchLookupComponent<TypeContainer>;
-  @ViewChild('datatable') datatableRef: ElementRef
+  @ViewChild('datatableExpectedContainers') datatableRef: ElementRef
 
   expectedStocks: ExpectedStock[] = [];
   expectedStock: ExpectedStock;
@@ -35,7 +37,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   private stockId: Guid;
   loadedCount: number = 0;
   emptyCount: number = 0;
-  datatable: Api<any>;
+  datatableExpectedContainers: Api<any>;
   isNotCheckNumber: boolean = false;
   filePath: string;
   isloadedCntr: boolean = false;
@@ -43,6 +45,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
 
   checkImportDataResult: ImportContainerResult = new ImportContainerResult();
   isImportInvalidDigit: boolean = false; // Флаг для импорта данных с неверной контрольной цифрой
+  isRestoreFromMarkedForDelete: boolean = false; // Флаг для восстановления данных с пометкой на удаление
   isLoading:boolean = true;
 
   // Флаги фильтров
@@ -69,7 +72,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       // Инициализация скрипта core.bundle.js
-      this.initScriptServ.loadScript('./assets/js/core.bundle.js')
+      this.initScriptServ.loadScript('/assets/js/core.bundle.js')
     .then(() => 
       console.log('Скрипт core.bundle.js загружен и готов к использованию.'))
     .catch((error) => 
@@ -82,9 +85,9 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   }
 
   checkToastr(): void {
-    let exportData = this.datatable.rows({search: 'applied'}).data().toArray();
+    let exportData = this.datatableExpectedContainers.rows({search: 'applied'}).data().toArray();
     console.log(exportData);
-    let selectedRows = this.datatable.rows({selected: true}).data();
+    let selectedRows = this.datatableExpectedContainers.rows({selected: true}).data();
     console.log(selectedRows);
     this.toastr.success('Сообщение отправлено!', 'Успех');
   }
@@ -92,7 +95,9 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   onMarkToDelete(): void {
     // let exportData = this.datatable.rows({search: 'applied'}).data().toArray();
     // console.log(exportData);
-    const selectedRowsId: Guid[] = this.datatable.rows({selected: true}).data().toArray().map((row: ExpectedStock) => row.id);
+    this.datatableExpectedContainers.rows({selected: true}).data().toArray().map((row: ExpectedStock) => {console.log(row); row.containerId});
+    const selectedRowsId: Guid[] = this.datatableExpectedContainers.rows({selected: true}).data().toArray().map((row: ExpectedStock) => row.container.id);
+    console.log(selectedRowsId);
 
     if (selectedRowsId.length == 0)
     {
@@ -119,13 +124,14 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
 
     console.log(this.stateContaner);
 
-    this.stockDetailServ.addContainerToStock(this.expectedStock, this.stateContaner).subscribe(
-      resp => { 
+    this.stockDetailServ.addContainerToStock(this.expectedStock, this.stateContaner).subscribe({
+      next: (resp) => { 
         console.log(resp); 
         this.loadData();
         this.toastr.success('Запись успешно добавлена', 'Сообщение');
       }, 
-      error => {});
+      error: (err) => {this.toastr.error(err.error.description, 'Ошибка');}
+  });
   }
 
   onCheckImportData(): void {
@@ -158,29 +164,73 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onImportData(checkImportDataResult: ImportContainerResult): void {
-    console.log(this.isloadedCntr);
-
-    let importData = checkImportDataResult.validContaners;
+  // Формирование массива Container для импорта
+  private getDataImport(checkImportDataResult: ImportContainerResult): Container[] {
+    let result = checkImportDataResult.validContaners;
     
     if (checkImportDataResult.invalidControlDigitRows > 0 && this.isImportInvalidDigit)
-      importData = [ ...checkImportDataResult.invalidControlDigitContaners];
+      result = result.concat(checkImportDataResult.invalidControlDigitContaners);
 
-    this.stockDetailServ.importData(importData, this.stockId, this.isloadedCntr).subscribe({next: (resp) =>{ this.toastr.success('Импорт данных успешно выполнен.' , 'Импорт данных')}, complete: () => {this.loadData(); importData=[] }});
+    return result;
   }
 
-  setStatus(): void {
-    if (this.expectedStock.state == 0)
-    {
-      this.expectedStock.state = 0;
-      this.expectedStock.status = 0;
-    }
-    else if (this.expectedStock.state == 1)
-    {
-      this.expectedStock.state = 1;
-      this.expectedStock.status = 1;
-    }
+  // Формирование массива Guid для восстановления
+  private getDataRestore(checkImportDataResult: ImportContainerResult): Guid[] | null {
+    return this.isRestoreFromMarkedForDelete ? checkImportDataResult.existsAsMarkedForDeletion.map(item => item.id) : null;
   }
+
+  private executeImportAndRestore(dataImport: Container[], dataRestore: Guid[]): void {
+
+    const import$ = dataImport.length > 0
+      ? this.stockDetailServ.importData(dataImport, this.stockId, this.isloadedCntr)
+      : of(null);
+
+    console.log(dataRestore);
+    const restore$ = dataRestore && dataRestore.length > 0
+      ? this.stockDetailServ.restoreData(dataRestore)
+      : of(null);
+
+    forkJoin([import$, restore$]).subscribe({
+      next: () => {
+        this.toastr.success('Импорт данных успешно выполнен.' , 'Импорт данных');
+        this.loadData();
+      },
+      error: (err) => {
+        console.log(err);
+        const message = err.error || 'Произошла ошибка при обработке данных.';
+      this.toastr.error(message, 'Ошибка');
+      }
+    })
+  }
+
+  onImportData(checkImportDataResult: ImportContainerResult): void {
+
+    const dataImport = this.getDataImport(checkImportDataResult);
+    const dataRestore = this.getDataRestore(checkImportDataResult);
+
+    console.log(dataRestore);
+
+    if (dataImport.length == 0 && dataRestore.length == 0)
+    {
+      this.toastr.info('Нет данных для обработки.', 'Импорт данных');
+      return;
+    }
+
+    this.executeImportAndRestore(dataImport, dataRestore);
+  }
+
+  // setStatus(): void {
+  //   if (this.expectedStock.state == 0)
+  //   {
+  //     this.expectedStock.state = 0;
+  //     this.expectedStock.status = 0;
+  //   }
+  //   else if (this.expectedStock.state == 1)
+  //   {
+  //     this.expectedStock.state = 1;
+  //     this.expectedStock.status = 1;
+  //   }
+  // }
 
   ngOnInit(): void {
 
@@ -198,14 +248,14 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
 
   // Вызов метода экспорта отображаемых данных
   onExportVisibleData(): void {
-    const exportData = this.datatable.rows({ search: 'applied' }).data().toArray(); // получение данных отображаемых строк
-    const visibleColumns = this.datatable.columns(':visible').indexes().filter((colIndex: number) => colIndex != 0).toArray(); // получение индексов видимых колонок, кроме первой колонки с чекбоксами
-    const columnHeaders = visibleColumns.map((colIndex: number) => this.datatable.column(colIndex).header().textContent); // получение заголовков
+    const exportData = this.datatableExpectedContainers.rows({ search: 'applied' }).data().toArray(); // получение данных отображаемых строк
+    const visibleColumns = this.datatableExpectedContainers.columns(':visible').indexes().filter((colIndex: number) => colIndex != 0).toArray(); // получение индексов видимых колонок, кроме первой колонки с чекбоксами
+    const columnHeaders = visibleColumns.map((colIndex: number) => this.datatableExpectedContainers.column(colIndex).header().textContent); // получение заголовков
 
     // Формирование массива с данными для экспорта
     const csvData = [columnHeaders.join(';'), ...exportData.map((row: ExpectedStock[]) =>
       visibleColumns.map((colIndex: number) => {
-        const colData = this.datatable.column(colIndex).dataSrc().toString();
+        const colData = this.datatableExpectedContainers.column(colIndex).dataSrc().toString();
         const value = this.getNestedValue(row, colData)
         return colData.includes('Date') ? this.formatDate(value) : value
       }).join(';'))].join('\n');
@@ -327,31 +377,35 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
       data: data,
 
       columns: [
+        { className: 'w-14', data: null, orderable: false, render: DataTable.render.select() },
         { 
-          data: null,
-          orderable: false,
-          render: DataTable.render.select()
+          title: `<span class="sort"><span class="sort-label font-normal text-gray-700">ID</span><span class="sort-icon"></span></span>`,
+          data: 'id', 
+          visible: false 
         },
-        { data: 'id', visible: false },
-        { data: 'container.number', },
-        { data: 'container.typeContainer.name', },
+        { 
+          title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Контейнер</span><span class="sort-icon"></span></span>`,
+          data: 'container.number', 
+        },
+        { 
+          title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Тип</span><span class="sort-icon"></span></span>`,
+          data: 'container.typeContainer.name', },
         {
-          data: 'container.containerStates', render: function(data) {
-            if (data.length>0) {
-              let lastState = data[data.length - 1].stateContainer.toString();
-              switch (lastState) {
-                case 'Loaded':
-                  return `<span class="badge badge-success badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-success me-1.5"></span>Груженый</span>`
-                case 'Empty':
-                  return `<span class="badge badge-danger badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-danger me-1.5"></span>Порожний</span>`
-                default:
-                  return `<span class="badge badge-warning badge-outline rounded-[30px]"><span class="badge badge-dot badge-warning size-1.5 me-1.5"></span>Неизвестно</span>`;
-              }
+          title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Состояние</span><span class="sort-icon"></span></span>`,
+          data: 'container.currentState.stateContainerDescription',
+          render: function(data) {
+            switch(data){
+              case 'Груженый':
+                return `<span class="badge badge-success badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-success me-1.5"></span>${data}</span>`;
+              case 'Порожний':
+                return `<span class="badge badge-warning badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-warning me-1.5"></span>${data}</span>`
+              default:
+                return `<span class="badge badge-danger badge-outline rounded-[30px]"><span class="badge badge-dot badge-danger size-1.5 me-1.5"></span>Неизвестно</span>`;
             }
-            else return `<span class="badge badge-warning badge-outline rounded-[30px]"><span class="badge badge-dot badge-warning size-1.5 me-1.5"></span>Неизвестно</span>`;
           }
         },
         {
+          title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Дата заявки</span><span class="sort-icon"></span></span>`,
           data: 'applicationDate', 
           render: function (data) {
             let date = new Date(data);
@@ -381,6 +435,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
       ],
 
       language: {
+        emptyTable: '<div class="text-center">Данные в таблице отсутствуют.</div>',
         loadingRecords: '<div class="text-center">Загрузка...</div>',
         infoEmpty: '<h3 class="card-title font-medium text-sm">Показано 0 из 0 записей</h3>',
         infoFiltered: '',
@@ -429,18 +484,17 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
 
     DataTable.ext.search.push(this.filterByDate.bind(this)); // Подключение дополнительной фильтрации
 
-    if (this.datatableRef && this.datatableRef.nativeElement)
-    {
-      if (this.datatable) {
-        this.datatable.clear();
-        this.datatable.rows.add(data);
-        this.datatable.draw();
+    if (this.datatableRef && this.datatableRef.nativeElement) {
+      if (this.datatableExpectedContainers) {
+        this.datatableExpectedContainers.clear();
+        this.datatableExpectedContainers.rows.add(data);
+        this.datatableExpectedContainers.draw();
+      }
+      else {
+        this.datatableExpectedContainers = new DataTable(this.datatableRef.nativeElement, configDataTable)
+      }
     }
-    else {
-      this.datatable = new DataTable(this.datatableRef.nativeElement, configDataTable)
-    }
-    }
-    else{console.error('Таблица не найдена в DOM!')}
+    else { console.error('Таблица не найдена в DOM!') }
   }
 
   private loadData(): void {
@@ -454,7 +508,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
         setTimeout(() => {
           this.typeContainers = results.typeContainers.data;
           this.currentStock = results.currentStock.data;
-          this.expectedStocks = results.expectedStocks.data;
+          this.expectedStocks = results.expectedStocks.data; console.log(this.expectedStocks);
 
           this.loadedCount = this.expectedStocks.filter(el => el.state == 1).length;
           this.emptyCount = this.expectedStocks.filter(el => el.state == 0).length;
@@ -473,7 +527,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   // autofilter in column
   filterOnColumn(object: any): void {      
     console.log(object.value);
-    this.datatable.column(object.getAttribute('data-index')).search(object.value).draw();
+    this.datatableExpectedContainers.column(object.getAttribute('data-index')).search(object.value).draw();
   }
 
   stateCntr: 'empty' | 'loaded' | 'neutral' = 'neutral';

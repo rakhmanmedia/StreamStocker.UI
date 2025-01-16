@@ -26,11 +26,14 @@ export class SidebarComponent {
         {
           name: "Стоки", isAccordionShow: false, items: [
             { name: 'Сток ожидаемых', link: 'expected-stock', badge_soon: false },
-            { name: 'Удаленные', link: 'deleted', badge_soon: true },
+            { name: 'Удаленные', link: 'deleted-containers', badge_soon: false },
             { name: 'Переадресованные', link: 'redirected', badge_soon: true },
             { name: 'Сток порожних', link: 'empty-stock', badge_soon: true },
             { name: 'Сток груженых', link: 'loaded-stock', badge_soon: true }
           ]
+        },
+        {
+          name: "Ожидаемые контейнеры", isAccordionShow: false, items: []
         }
       ]
     },
@@ -59,6 +62,7 @@ export class SidebarComponent {
   }
 
   clickMenuItem(itemName: string) {
-    this.titleServ.setTitle(itemName);
+    console.log(itemName);
+    //this.titleServ.setTitle(itemName);
   }
 }

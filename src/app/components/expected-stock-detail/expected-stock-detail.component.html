@@ -136,7 +136,7 @@
               <div class="menu-separator">
               </div>
               <div class="menu-item">
-                <a class="menu-link" href="#">
+                <a class="menu-link" data-modal-toggle="#redirect_containers">
                  <span class="menu-icon">
                   <i class="ki-filled ki-arrow-right-left">
                   </i>
@@ -237,56 +237,12 @@
       <div class="grid gap-5 lg:gap-7.5">
         <div class="card card-grid min-w-full">
           <div class="card-body">
-            <table id="datatable_1" #datatable>
+            <table id="datatable_expected_containers" #datatableExpectedContainers>
               <thead>
-                <tr>
-                  <th class="w-14">
-                  </th>
-                  <th>
-                    <span class="sort">
-                      <span class="sort-label font-normal text-gray-700">
-                        ID
-                      </span>
-                      <span class="sort-icon"></span>
-                    </span>
-                  </th>
-                  <th>
-                    <span class="sort">
-                      <span class="sort-label font-normal text-gray-700">
-                        Контейнер
-                      </span>
-                      <span class="sort-icon"></span>
-                    </span>
-                  </th>
-                  <th>
-                    <span class="sort">
-                      <span class="sort-label font-normal text-gray-700">
-                        Тип
-                      </span>
-                      <span class="sort-icon"></span>
-                    </span>
-                  </th>
-                  <th>
-                    <span class="sort">
-                      <span class="sort-label font-normal text-gray-700">
-                        Состояние
-                      </span>
-                      <span class="sort-icon"> </span>
-                    </span>
-                  </th>
-                  <th>
-                    <span class="sort">
-                      <span class="sort-label font-normal text-gray-700">
-                        Дата заявки
-                      </span>
-                      <span class="sort-icon"> </span>
-                    </span>
-                  </th>
-                </tr>
               </thead>
               <thead>
                 <tr>
-                  <th class="w-14"></th>
+                  <th></th>
                   <th class="min-w-60px]">
                     <div class="input input-sm">
                       <input placeholder="Контейнер" data-index="2" type="text" value="" #container
@@ -312,9 +268,6 @@
                 </tr>
               </thead>
               <tbody></tbody>
-              <tfoot>
-  
-              </tfoot>
             </table>
           </div>
         </div>
@@ -372,11 +325,11 @@
               </div> -->
   
               <label class="form-label font-normal text-gray-900">Состояние:</label>
-              <select class="select" name="state" [(ngModel)]="stateContaner" (change)="setStatus()"
+              <select class="select" name="state" [(ngModel)]="stateContaner" 
                 #state="ngModel" required>
                 <option id="" disabled selected>Выберете состояние</option>
-                <option id="" value="empty">Порожний</option>
-                <option id="" value="loaded">Груженый</option>
+                <option id="" value="Empty">Порожний</option>
+                <option id="" value="Loaded">Груженый</option>
               </select>
               <div class="text-danger text-2sm" *ngIf="state.invalid && (state.touched || state.dirty)">
                 <span *ngIf="state.errors?.['required']">Поле обязательно для заполнения.</span>
@@ -563,7 +516,7 @@
               </div> -->
 
               <div class="w-48">
-                <select class="select select-sm" [(ngModel)]="stateCntr" (change)="onStateCntrChange()">
+                <select class="select select-sm" [(ngModel)]="stateCntr" (change)="onStateCntrChange()" [disabled]="checkImportDataResult.validRows == 0 && !isImportInvalidDigit">
                   <option value="neutral" [disabled]="stateCntr!='neutral'">Выберете состояние</option>
                   <option value="empty">Порожний</option>
                   <option value="loaded">Груженый</option>
@@ -576,16 +529,15 @@
               </div>
             
               <div class="flex flex-col gap-2.5"><label class="checkbox-group"><input type="checkbox" class="checkbox checkbox-sm"
-                    readonly="" value="1" [disabled]="checkImportDataResult.markedForDeletionRows == 0"><span
+                    readonly="" value="1" [disabled]="checkImportDataResult.markedForDeletionRows == 0" [(ngModel)]="isRestoreFromMarkedForDelete"><span
                     class="checkbox-label">Восстановить из удаленных</span></label>
               </div>
             </div>
 
             <div class="menu-separator">
             </div>
-
             <div class="flex flex-col-2 gap-2">
-              <button type="button" class="btn btn-success justify-center" [disabled]="(checkImportDataResult.validRows == 0 && !isImportInvalidDigit) || stateCntr =='neutral'" (click)="onImportData(checkImportDataResult)" data-modal-dismiss="true">
+              <button type="button" class="btn btn-success justify-center" [disabled]="(!isRestoreFromMarkedForDelete && ((checkImportDataResult.validRows == 0 && !isImportInvalidDigit) || (isImportInvalidDigit && stateCntr =='neutral')))" (click)="onImportData(checkImportDataResult)" data-modal-dismiss="true">
                 Загрузить
               </button>
               <button class="btn btn-light justify-center">
@@ -600,3 +552,48 @@
   </ng-container>
   <!-- End Modal Import File -->
 
+  <!-- Modal Redirect Containers -->
+  <ng-container>
+    <div class="modal open" data-modal="true" id="redirect_containers" style="z-index: 90;">
+      <div class="modal-content max-w-[700px] top-[15%]">
+        <div class="modal-header pr-2.5">
+          <h3 class="modal-title">
+            Переадресация
+          </h3>
+          <button class="btn btn-sm btn-icon btn-light btn-clear shrink-0" data-modal-dismiss="true">
+            <i class="ki-filled ki-cross">
+            </i>
+          </button>
+        </div>
+        <div class="modal-body grid gap-5 px-0 py-5">
+          <form #form="ngForm" (ngSubmit)="onSubmit()">
+            <div class="flex flex-col px-5 gap-2.5">
+
+              <label class="form-label font-normal text-gray-900">Дата переадресации:</label>
+              <input class="input" name="applicationDate" #applicationDate="ngModel"
+                [(ngModel)]="expectedStock.applicationDate" type="date" value="" />
+  
+              <label class="form-label font-normal text-gray-900" aria-disabled="true">Причина переадресации:</label>
+              <textarea class="textarea" placeholder="Причина переадресации" rows="5" value=""></textarea>
+              
+  
+              <div class="menu-separator">
+              </div>
+              <div class="flex flex-col-2 gap-2">
+                <button type="submit" class="btn btn-primary justify-center" data-modal-dismiss="true"
+                  [disabled]="form.invalid">
+                  Переадресовать
+                </button>
+                <button class="btn btn-light justify-center">
+                  Отмена
+                </button>
+              </div>
+  
+            </div>
+          </form>
+  
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <!-- End Modal Import File -->

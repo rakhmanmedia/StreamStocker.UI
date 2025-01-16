@@ -35,13 +35,23 @@ export class StockDetailService {
   }
 
   // Вызов сервиса импорта данных
-  importData(importData: Container[], stockId: Guid, isLoadedCntr: boolean): Observable<boolean> {
+  importData(importData: Container[], stockId: Guid, isLoadedCntr: boolean): Observable<IBaseResponse<boolean>> {
+    console.log(importData);
+    console.log(stockId);
+    console.log(isLoadedCntr);
     const params = { stockId: stockId.toString(), isLoadedCntr: isLoadedCntr.toString() };
     console.log(params);
-    return this.http.post<boolean>(
-        `${this.stokerApi}/api/expectedstock/import-data`,
-        importData,
-        { params }
-    );
+    const test: string = 'test';
+    return this.http.post<IBaseResponse<boolean>>(`${this.stokerApi}/api/expectedstock/import-data`, importData, {params});
+  }
+
+  // Получение списка контейнеров с пометкой на удаление
+  getMarkedToDeletContainers(): Observable<IBaseResponse<ExpectedStock[]>> {
+    return this.http.get<IBaseResponse<ExpectedStock[]>>(`${this.stokerApi}/api/expectedstock/get-deleted-containers`).pipe(catchError(err => { throw err }));
+  }
+
+  // Восстановление контейнеров с пометкой на удаление
+  restoreData(guids: Guid[]): Observable<IBaseResponse<boolean>> {
+    return this.http.post<IBaseResponse<boolean>>(`${this.stokerApi}/api/expectedstock/restore-data`, guids).pipe(catchError(err => {throw err}));
   }
 }

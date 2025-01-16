@@ -4,4 +4,5 @@ export class ContainerState {
     id: Guid;
     containerId: Guid;
     stateContainer: string;
+    datestamp: Date
 }

@@ -4,7 +4,7 @@ import { Container } from "./container";
 export class ExpectedStock{
     id: Guid;
     stockId: Guid;
-    containerId: string;
+    containerId: Guid;
     container: Container = new Container();
     state: number;
     status: number;

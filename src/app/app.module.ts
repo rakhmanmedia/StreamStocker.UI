@@ -27,6 +27,7 @@ import { ContainerValidatorDirective } from './directives/container-validator.di
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PreloaderComponent } from './core/components/preloader/preloader.component';
+import { DeletedContainersComponent } from './components/expected/deleted-containers/deleted-containers.component';
 
 @NgModule({
     declarations: [
@@ -46,6 +47,7 @@ import { PreloaderComponent } from './core/components/preloader/preloader.compon
         SearchLookupComponent,
         ContainerValidatorDirective,
         PreloaderComponent,
+        DeletedContainersComponent,
     ],
     bootstrap: [AppComponent],
     imports: [
