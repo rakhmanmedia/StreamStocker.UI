@@ -16,7 +16,6 @@ import { ContentComponent } from './core/components/content/content.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FooterComponent } from './core/components/footer/footer.component';
 import { ExpectedStockComponent } from './components/expected-stock/expected-stock.component';
-import { EmptyStockComponent } from './components/empty-stock/empty-stock.component';
 import { LoadedStockComponent } from './components/loaded-stock/loaded-stock.component';
 import { LayoutComponent } from './core/components/layout/layout.component';
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
@@ -28,6 +27,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PreloaderComponent } from './core/components/preloader/preloader.component';
 import { DeletedContainersComponent } from './components/expected/deleted-containers/deleted-containers.component';
+import { RedirectedContainersComponent } from './components/expected/redirected-containers/redirected-containers.component';
 
 @NgModule({
     declarations: [
@@ -40,7 +40,6 @@ import { DeletedContainersComponent } from './components/expected/deleted-contai
         DashboardComponent,
         FooterComponent,
         ExpectedStockComponent,
-        EmptyStockComponent,
         LoadedStockComponent,
         LayoutComponent,
         ExpectedStockDetailComponent,
@@ -48,6 +47,7 @@ import { DeletedContainersComponent } from './components/expected/deleted-contai
         ContainerValidatorDirective,
         PreloaderComponent,
         DeletedContainersComponent,
+        RedirectedContainersComponent,
     ],
     bootstrap: [AppComponent],
     imports: [

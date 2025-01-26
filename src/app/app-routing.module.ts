@@ -6,6 +6,7 @@ import { ExpectedStockComponent } from './components/expected-stock/expected-sto
 import { ExpectedStockDetailComponent } from './components/expected-stock-detail/expected-stock-detail.component';
 import { Page404Component } from './components/page-404/page-404.component';
 import { DeletedContainersComponent } from './components/expected/deleted-containers/deleted-containers.component';
+import { RedirectedContainersComponent } from './components/expected/redirected-containers/redirected-containers.component';
 
 const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -13,6 +14,7 @@ const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full'},
   { path: 'expected-stock', component: ExpectedStockComponent },
   { path: 'deleted-containers', component: DeletedContainersComponent },
+  { path: 'redirected-containers', component: RedirectedContainersComponent },
   { path: 'expected-stock/:id', component: ExpectedStockDetailComponent },
   { path: 'expected-stock/detail', component: ExpectedStockDetailComponent },
   { path: '**', component: Page404Component }
