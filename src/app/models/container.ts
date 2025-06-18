@@ -1,16 +1,15 @@
 import { Guid } from "guid-typescript";
-import { TypeContainer } from "./typeContainer";
-import { ContainerState } from "./container-state";
-import { ContainerDocument } from "./container-document";
+import { StateContainerEnum } from "./state-container-enum";
 
 export class Container {
     id: Guid;
     number: string;
-    isValidControlDigit: boolean;
-    typeContainerId: Guid;
-    typeContainer: TypeContainer;
-    containerStates: ContainerState[];
-    currentStateId: Guid;
-    currentState: ContainerState;
-    containerDocuments: ContainerDocument[];
+    typeContainerName: string;
+    buildingYear: number;
+    tareWeight: number;
+    payload: number;
+    /* currentStatusName: string;
+    currentStateName: string;
+    stateContainerEnum: StateContainerEnum;
+    isCompetedStatus:boolean */
 }

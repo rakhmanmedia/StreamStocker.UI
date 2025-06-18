@@ -1,0 +1,10 @@
+<div class="relative w-full">
+    <input class="input w-full" [placeholder]="placeholder" [value]="value" (input)="onInput($event)"
+        (blur)="onBlur()" autocomplete="off"/>
+    <ul *ngIf="showAutoComplete"
+        class="absolute dropdown-content w-full p-4 open mt-1 scrollable-y-hover max-h-[170px]" style="display: block;">
+        <li *ngFor="let item of filtredResult" class="px-4 py-2 text-2sm hover:bg-gray-200 cursor-pointer"
+            (mousedown)="onSelect(item)">{{item[displayField]}}
+        </li>
+    </ul>
+</div>

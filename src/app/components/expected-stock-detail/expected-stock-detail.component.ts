@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild  } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren  } from '@angular/core';
 import { StockDetailService } from '../../services/stock-services/stock-detail.service';
 import { ExpectedStock } from '../../models/expected-stock';
 import { ActivatedRoute } from '@angular/router';
@@ -6,18 +6,26 @@ import { Guid } from 'guid-typescript';
 import { StockService } from '../../services/stock-services/stock.service';
 import { Stock } from '../../models/stock';
 import { SearchLookupComponent } from '../../core/elements/search-lookup/search-lookup.component';
-//import DataTable, { Api, Config } from 'datatables.net-dt';
 import DataTable, { Api, Config } from 'datatables.net';
 import 'datatables.net-select';
 import 'datatables.net-colreorder';
 import { TypeContainerService } from '../../services/typeContainer-services/type-container.service';
 import { TypeContainer } from '../../models/typeContainer';
 import { ToastrService } from 'ngx-toastr';
-import { InitializeScriptService } from '../../services/initializer-services/initialize-script.service';
-import { forkJoin, of } from 'rxjs';
-import { error } from 'jquery';
+import { catchError, EMPTY, finalize, forkJoin, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { data, error } from 'jquery';
 import { ImportContainerResult } from '../../models/importContainerResult';
 import { Container } from '../../models/container';
+import { DatatableConfigService } from '../../services/datatable-config-services/datatable-config.service';
+import { RedirectedContainerService } from '../../services/redirected-container-service/redirected-container.service';
+import { TextService } from '../../services/utils/text.service';
+import { ExpectedContainer } from '../../models/expected-container-read';
+import { StateContainerEnum } from '../../models/state-container-enum';
+import { ExpectedContainerCreate } from '../../models/expected-container-create';
+import { RedirectedContainerCreate } from '../../models/redirected-container-create';
+import { NgForm, NgModel } from '@angular/forms';
+import { EmptyContainerService } from '../../services/empty-container-services/empty-container.service';
+import { EmptyContainerCreate } from '../../models/empty-container-create';
 
 @Component({
   selector: 'app-expected-stock-detail',
@@ -25,19 +33,47 @@ import { Container } from '../../models/container';
   styleUrl: './expected-stock-detail.component.css'
 })
 
-export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
+export class ExpectedStockDetailComponent implements OnInit {
 
   @ViewChild(SearchLookupComponent) searchLookupContainers: SearchLookupComponent<TypeContainer>;
-  @ViewChild('datatableExpectedContainers') datatableRef: ElementRef
+  @ViewChild('datatableExpectedContainers') datatableRef: ElementRef;
+  @ViewChild('number') numberInput!: NgModel;
+  @ViewChild('form') form!: NgForm; // Ссылка на всю форму
+  
+  expectedContainers: ExpectedContainer[] = []; // Массив ожидаемых контейнеров
+  createExpectedContainer: ExpectedContainerCreate; // Новый ожидаемый контейнер
+  isLoading: boolean = false; // Флаг загрузки данных
 
-  expectedStocks: ExpectedStock[] = [];
+
+
+
+
+
+  isValidatorActive: boolean = true;
+
+  onNotRestore(): void {
+    this.isValidatorActive = false;
+  }
+
+  onContainerChange(): void {
+    this.isNotCheckNumber = false;
+  }
+
+  onIgnoreControlDigitChange(): void {
+    //this.numberInput.control?.updateValueAndValidity();
+  }
+
+
+  expectedStocks: ExpectedContainer[] = [];
   expectedStock: ExpectedStock;
+  expectedContainer: ExpectedContainer;
   typeContainers: TypeContainer[];
   currentStock: Stock;
   private stockId: Guid;
   loadedCount: number = 0;
   emptyCount: number = 0;
-  datatableExpectedContainers: Api<any>;
+  datatableExpectedContainers: any;
+  datatableToRedirectContainers: Api<any>;
   isNotCheckNumber: boolean = false;
   filePath: string;
   isloadedCntr: boolean = false;
@@ -46,19 +82,38 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   checkImportDataResult: ImportContainerResult = new ImportContainerResult();
   isImportInvalidDigit: boolean = false; // Флаг для импорта данных с неверной контрольной цифрой
   isRestoreFromMarkedForDelete: boolean = false; // Флаг для восстановления данных с пометкой на удаление
-  isLoading:boolean = true;
+  
+  isError: boolean = false;
+  isCheckingImportFile: boolean = false; // Флаг проверки импортируемого файла
+  isElementHidden = true;
+  selectedExpectedContainers: any[] = [];
+  configDatatable: any;
+  stateContainerEnum = StateContainerEnum;
+  stateContainerOptions: {key: string, value: string}[];
+  state:string;
 
   // Флаги фильтров
   isApplicationDateFilterActive: boolean = false;
 
   constructor(
-    private typeContainerServ: TypeContainerService, 
-    private stockDetailServ: StockDetailService, 
-    private stockServ: StockService, 
+    private datatableConfigServ: DatatableConfigService,
+    private redirectedContainerServ: RedirectedContainerService,
+    private emptyContainerServ: EmptyContainerService,
+    private typeContainerServ: TypeContainerService,
+    private stockDetailServ: StockDetailService,
+    private textServ: TextService,
+    private stockServ: StockService,
     private toastr: ToastrService,
-    private initScriptServ: InitializeScriptService,
+    private cdRef: ChangeDetectorRef,
     activateRoute: ActivatedRoute,
-    ) {
+  ) {
+
+
+    this.stateContainerOptions = Object.keys(this.stateContainerEnum)
+      .filter(key => isNaN(Number(key)))
+      .map(key => ({key, value: this.stateContainerEnum[key as keyof StateContainerEnum].toString() }))
+
+      console.log(this.stateContainerOptions);
 
     // Получение ID текущего стока
     this.stockId = activateRoute.snapshot.params['id'];
@@ -67,22 +122,360 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.expectedStock = new ExpectedStock();
     this.expectedStock.stockId = this.stockId
     this.expectedStock.applicationDate = new Date().toISOString().slice(0, 10);
+
+    this.createExpectedContainer = new ExpectedContainerCreate();
+    this.createExpectedContainer.stockId = this.stockId
+    this.createExpectedContainer.applicationDate = new Date().toISOString().slice(0, 10);
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      // Инициализация скрипта core.bundle.js
-      this.initScriptServ.loadScript('/assets/js/core.bundle.js')
-    .then(() => 
-      console.log('Скрипт core.bundle.js загружен и готов к использованию.'))
-    .catch((error) => 
-      console.log(`При загружке скрипта core.bundle.js произошла ошибка: ${error}`));
-    }, 0)
+  onAddExpectedContainer(): void {
+    this.stockDetailServ.addExpectedContainer(this.createExpectedContainer, this.stateCntr).subscribe({
+      next: (resp) => {
+        console.log(resp);
+        this.loadData();
+        this.toastr.success('Запись успешно добавлена', 'Сообщение');
+      },
+      error: (err) => { console.log(err); this.toastr.error(err.error.title, 'Ошибка'); }
+    });
   }
 
-  onContainerChange(): void {
-    this.isNotCheckNumber = false;
+  //--------------------------------- MAIN CONTENT ---------------------------------//
+
+  // Инициализация компонента
+  ngOnInit(): void {
+    
+    this.isLoading = true;
+    this.isError = false;
+    this.datatableConfigServ.configureDataTable();
+
+    forkJoin({
+      config: this.initializeDatatableConfig(),
+      stockData: this.stockServ.getStock(this.stockId),
+      expectedContainersData: this.stockDetailServ.getAllExpectedContainersByStockId(this.stockId),
+      typeContainers: this.typeContainerServ.getGetTypeContainers(),
+    })
+    .subscribe({
+      next: ({ config, stockData, expectedContainersData, typeContainers }) => {
+
+        this.configDatatable = config;
+        this.currentStock = stockData.data;
+        this.expectedContainers = expectedContainersData.data;
+        this.typeContainers = typeContainers.data;
+
+        config = {
+          ...this.datatableConfigServ.getDefaultConfig(),
+          columns: this.getColumns(),
+          data: this.expectedContainers
+        };        
+
+        this.isLoading = false;
+        this.cdRef.detectChanges();
+        this.initializeDataTable(config);
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoading = false;
+        this.isError = true;
+        this.toastr.error(err.statusText, 'Ошибка загрузки');
+      }
+    })
   }
+  //
+
+  onAcceptContainer(): void {
+    const selectedRows: ExpectedContainer[] = this.datatableExpectedContainers.rows({ selected: true }).data().toArray().map((row: ExpectedContainer) => row);
+
+    if (selectedRows.length == 0) {
+      this.toastr.warning('Не выбрано ни одной записи.', 'Внимание')
+      return;
+    }
+
+    const emptyContainers = selectedRows
+      .filter(item => item.sessionContainer.currentSessionContainerState.stateContainer == 'Empty')
+      .map(expectedContainer => <EmptyContainerCreate>{
+        stockId: expectedContainer.stockId,
+        sessionContainerId: expectedContainer.sessionContainer.id,
+      });
+
+      this.emptyContainerServ.addEmptyContainers(emptyContainers)
+      .pipe(
+        switchMap((result) => {
+          return this.reloadDatatable().pipe(
+            tap(() => this.toastr.success(result.description, 'Принятие контейнера'))
+          )
+        })
+      )
+      .subscribe();
+
+    const loadedStateSelectedRows = selectedRows
+      .filter(item => item.sessionContainer.currentSessionContainerState.stateContainer == 'Loaded');
+  }
+
+  // Перезагрузка Datatable
+  private reloadDatatable(): Observable<void> {
+    if (!this.datatableExpectedContainers) {
+      return of(void 0);
+    }
+
+    this.datatableExpectedContainers.processing(true);
+        
+    return this.stockDetailServ.getAllExpectedContainersByStockId(this.stockId)
+      .pipe(
+        tap((result) => {
+          this.expectedStocks = result.data;
+          this.configDatatable = {
+            data: this.expectedStocks
+          }
+          this.initializeDataTable(this.configDatatable);
+        }),
+        finalize(() => this.datatableExpectedContainers.processing(false)),
+        map(() => void 0),
+        catchError(err => {
+          this.toastr.error(err.error, 'Ошибка обновления');
+          return throwError(() => err);
+        })
+      )
+  }
+  //
+
+
+  // Инициализация DataTable
+  private initializeDataTable(config: any): void {
+    if (this.datatableRef && this.datatableRef.nativeElement)
+    {
+      if (this.datatableExpectedContainers) {
+        this.datatableExpectedContainers.clear();
+        this.datatableExpectedContainers.rows.add(config.data);
+        this.datatableExpectedContainers.draw();
+      }
+      else this.datatableExpectedContainers = new DataTable(this.datatableRef.nativeElement, config)
+    }
+    else console.error('Таблица не найдена в DOM!');
+  }
+  //
+
+  // Инициализация конфигурации Datatable
+  private initializeDatatableConfig(): Observable<any> {
+    return new Observable((observer) => {
+      this.datatableConfigServ.configureDataTable();
+      const config = {
+        ...this.datatableConfigServ.getDefaultConfig(),
+        columns: this.getColumns()
+      };
+      observer.next(config);
+      observer.complete();
+    });
+  }
+  //
+
+  // Пометить на удаление
+  onMarkToDelete(): void {
+    const selectedRowsId: Guid[] = this.datatableExpectedContainers.rows({selected: true}).data().toArray().map((row: ExpectedContainer) => row.sessionContainer.id);
+    console.log(selectedRowsId);
+    
+    if (selectedRowsId.length == 0)
+    {
+      this.toastr.warning('Не выбрано ни одной записи.', 'Внимание')
+      return;
+    }
+
+    this.stockDetailServ.markToDelete(selectedRowsId).subscribe({
+      next: (resp) => {
+        if (resp.data)
+        {
+          this.reloadDatatable().subscribe({
+            next: () => this.toastr.success(`Записи успешно помечены на удаление: ${selectedRowsId.length} ${this.textServ.getRecordWord(selectedRowsId.length)}.`, 'Удаление'),
+            error: () => this.toastr.error('Не удалось обновить таблицу', 'Ошибка')
+          }); 
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error, 'Ошибка');
+      }
+    });
+  }
+  //
+
+  // Генерация и получение колонок Datatable
+  private getColumns(): any[] {
+    return [
+      { className: 'w-14', data: null, orderable: false, render: DataTable.render.select() },
+      {
+        title: `<span class="sort"><span class="sort-label font-normal text-gray-700">ID</span><span class="sort-icon"></span></span>`,
+        data: 'id',
+        visible: false
+      },
+      {
+        title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Контейнер</span><span class="sort-icon"></span></span>`,
+        data: 'sessionContainer.container.number',
+        render: function (data: any, type, row) {
+          switch (row.isValidControlDigit) {
+            case true:
+              return `<div class="flex items-center gap-1"><span class="text-sm font-medium text-gray-900">${data}</span><i class="ki-filled ki-verify me-1 text-success"></i></div><div class="tooltip transition-opacity duration-300" id="transition_tooltip">
+                  Sleek tooltip with opacity transition effect.
+                </div>`;
+            case false:
+              return `<div class="flex items-center gap-1"><span class="text-sm font-medium text-gray-900">${data}</span><i class="ki-filled ki-information me-1 text-warning" data-tooltip="#transition_tooltip"></i></div><div class="tooltip" id="transition_tooltip">
+                  Контрольная цифра не соответствует.
+                </div>`;
+            default:
+              return data;
+          }
+        }
+      },
+      {
+        title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Тип</span><span class="sort-icon"></span></span>`,
+        data: 'sessionContainer.container.typeContainerName',
+      },
+      {
+        title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Состояние</span><span class="sort-icon"></span></span>`,
+        data: 'sessionContainer.currentSessionContainerState.stateContainer',
+        render: function (data: StateContainerEnum, type, row) {  
+          switch (data) {
+            case StateContainerEnum.Loaded:
+              return `<span class="badge badge-success badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-success me-1.5"></span>${row.sessionContainer.currentSessionContainerState.stateContainerDescription}</span>`;
+            case StateContainerEnum.Empty:
+              return `<span class="badge badge-warning badge-outline rounded-[30px]"><span class="size-1.5 rounded-full badge-warning me-1.5"></span>${row.sessionContainer.currentSessionContainerState.stateContainerDescription}</span>`
+            default:
+              return `<span class="badge badge-danger badge-outline rounded-[30px]"><span class="badge badge-dot badge-danger size-1.5 me-1.5"></span>Неизвестно</span>`;
+          }
+        }
+      },
+      {
+        title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Дата заявки</span><span class="sort-icon"></span></span>`,
+        data: 'applicationDate',
+        render: function (data: any) {
+          let date = new Date(data);
+          return date.toLocaleDateString();
+        }
+      },
+    ];
+  }
+//
+
+showFilterPanel(): void {
+  this.isElementHidden = !this.isElementHidden;
+}
+
+//--------------------------------- END MAIN CONTENT ---------------------------------//
+
+//--------------------------------- REDIRECT MODAL ---------------------------------//
+
+// Открытие модального окна для переадресации контейнеров
+onOpenRedirectModal(): void {
+  const expectedContainers = this.datatableExpectedContainers.rows({ selected: true }).data().toArray();
+
+  if (expectedContainers.length == 0)
+    this.toastr.warning('Не выбрано ни одной записи.', 'Внимание');
+
+  else if (expectedContainers.length > 10)
+    this.toastr.warning('Возможно переадресовать не более 10 записей.', 'Внимание');
+  else {
+    this.selectedExpectedContainers = expectedContainers.map(expectedContainer => {
+      return <RedirectedContainerCreate>{
+        sessionContainerId: expectedContainer.sessionContainerId,
+        sessionContainer: {
+          container: expectedContainer.sessionContainer.container
+        },
+        comments: '',
+        redirectionDate: new Date().toISOString().slice(0, 10),
+        stockId: this.currentStock.id
+      };
+    });
+  }
+}
+//
+
+onRedirect(): void {
+  this.redirectedContainerServ.addRedirectedContainers(this.selectedExpectedContainers)
+  .pipe(
+    switchMap((result) => {
+      return this.reloadDatatable()
+      .pipe(
+        tap(() => this.toastr.success(result.description, 'Переадресация контейнера'))
+      )
+    }),
+    catchError((err) => {
+      this.toastr.error(err.error, 'Ошибка переадресации');
+      return EMPTY;
+    })
+  )
+  .subscribe();
+  // this.redirectedContainerServ.addRedirectedContainers(this.selectedExpectedContainers).subscribe({
+  //   next: (resp) => {
+  //     this.reloadDatatable().subscribe({
+  //       next: () => this.toastr.success(resp.description, "Переадресация"),
+  //       error: (err) => this.toastr.error('Не удалось обновить таблицу', 'Ошибка')
+  //     });  
+  //   },
+  //   error: (err) => {
+  //     console.log(err);
+  //     this.toastr.error(err.error.description, 'Ошибка');
+  //   }
+  // })
+}
+
+//--------------------------------- END REDIRECT MODAL ---------------------------------//
+
+
+
+  
+
+  
+
+  configureTableToRedirect(data: any[]): void
+  {
+    console.log('ddd');
+    
+    const configDataTableToRedirect: Config = {
+
+      columns: [
+        { title: 'Контейнер'}
+      //   {
+      //     className: 'text-start !font-normal !text-gray-700',
+      //     title: 'Контейнер',
+      //     data: 'container.number',
+      //     render: function(data) {
+      //       return `<span class="text-sm font-medium text-gray-900 hover:text-primary">${data}</span>`
+      //     }
+      //   },
+      //   {
+      //     className: '!font-normal !text-gray-700',
+      //     title: 'Примечание',
+      //     data: 'comments',
+      //     render: function(data: any, type: any) {
+      //       return `<input class="input border-0 bg-transparent" placeholder="примечание" ([ngModel])="comments" value="${data}"/>`
+      //     }
+      //   },
+      //   {
+      //     className: '!font-normal !text-gray-700',
+      //     title: 'Документы',
+      //     data: null
+      //   }
+      ],
+      search: true,
+      ordering: false,
+      info: false,
+      paging: true,
+      pageLength: 5,
+      searching: false
+    };
+    
+    if (!this.datatableToRedirectContainers) {
+      DataTable.ext.classes.table = 'table';
+      this.datatableToRedirectContainers = new DataTable('#datatableToEedirectContainers');
+    }
+    else {
+      this.datatableToRedirectContainers.clear(); // Clear existing data
+      this.datatableToRedirectContainers.rows.add(data); // Add new data
+      this.datatableToRedirectContainers.draw(); // Redraw the table
+    }
+
+    console.log(this.datatableToRedirectContainers);
+    
+  }
+
+
 
   checkToastr(): void {
     let exportData = this.datatableExpectedContainers.rows({search: 'applied'}).data().toArray();
@@ -92,57 +485,21 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.toastr.success('Сообщение отправлено!', 'Успех');
   }
 
-  onMarkToDelete(): void {
-    // let exportData = this.datatable.rows({search: 'applied'}).data().toArray();
-    // console.log(exportData);
-    this.datatableExpectedContainers.rows({selected: true}).data().toArray().map((row: ExpectedStock) => {console.log(row); row.containerId});
-    const selectedRowsId: Guid[] = this.datatableExpectedContainers.rows({selected: true}).data().toArray().map((row: ExpectedStock) => row.container.id);
-    console.log(selectedRowsId);
+  
 
-    if (selectedRowsId.length == 0)
-    {
-      this.toastr.warning('Не выбрано ни одной записи.', 'Внимание')
-      return
-    }
 
-    this.stockDetailServ.markToDelete(selectedRowsId).subscribe({
-      next: (resp) => {
-        if (resp.data)
-        {
-          this.loadData();
-          this.toastr.success('Записи успешно помечены на удаление.', 'Удаление');
-        }
-      },
-      error: (err) => {
-        console.log(err.error.description); this.toastr.error(err.error.description, 'Ошибка');
-      }
-    });
-  }
 
-  stateContaner: string = '';
-  onSubmit(): void {
 
-    console.log(this.stateContaner);
-
-    this.stockDetailServ.addContainerToStock(this.expectedStock, this.stateContaner).subscribe({
-      next: (resp) => { 
-        console.log(resp); 
-        this.loadData();
-        this.toastr.success('Запись успешно добавлена', 'Сообщение');
-      }, 
-      error: (err) => {this.toastr.error(err.error.description, 'Ошибка');}
-  });
-  }
 
   onCheckImportData(): void {
-    this.isLoading = true;
+    console.log(this.checkImportDataResult);
+    
+    this.isCheckingImportFile = true;
     const options = {
       path: this.filePath,
       stockId: this.stockId,
       isLoadedCntr: this.isloadedCntr
-    }
-    console.log(this.filePath);
-    console.log(this.isloadedCntr);
+    };
 
     const fileInput = document.querySelector('#import-file-path') as HTMLInputElement;
 
@@ -157,8 +514,13 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
           this.checkImportDataResult = resp.data; 
           console.log(this.checkImportDataResult);
         }, 
+        error: (err) => {
+          console.log(err);
+          this.toastr.error(err.message, "Ошибка проверки файла");
+          this.isCheckingImportFile = false;
+        },
         complete: () => { 
-          this.isLoading = false; 
+          this.isCheckingImportFile = false; 
         } 
       })
     }
@@ -179,20 +541,20 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     return this.isRestoreFromMarkedForDelete ? checkImportDataResult.existsAsMarkedForDeletion.map(item => item.id) : null;
   }
 
-  private executeImportAndRestore(dataImport: Container[], dataRestore: Guid[]): void {
-
-    const import$ = dataImport.length > 0
-      ? this.stockDetailServ.importData(dataImport, this.stockId, this.isloadedCntr)
+  public executeImportAndRestore(dataImport: Container[], dataRestore: Guid[]): void {
+    console.log(dataRestore);
+    
+    const import$ = dataImport && dataImport.length > 0
+      ? this.stockDetailServ.importData(dataImport, this.stockId, this.stateCntr)
       : of(null);
 
-    console.log(dataRestore);
     const restore$ = dataRestore && dataRestore.length > 0
-      ? this.stockDetailServ.restoreData(dataRestore)
+      ? this.stockDetailServ.restoreData(dataRestore, this.currentStock.id, this.stateCntr)
       : of(null);
 
     forkJoin([import$, restore$]).subscribe({
       next: () => {
-        this.toastr.success('Импорт данных успешно выполнен.' , 'Импорт данных');
+        this.toastr.success('Импорт / восстанволение данных успешно выполнен.' , 'Импорт / восстанволение данных');
         this.loadData();
       },
       error: (err) => {
@@ -204,7 +566,6 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
   }
 
   onImportData(checkImportDataResult: ImportContainerResult): void {
-
     const dataImport = this.getDataImport(checkImportDataResult);
     const dataRestore = this.getDataRestore(checkImportDataResult);
 
@@ -219,32 +580,9 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.executeImportAndRestore(dataImport, dataRestore);
   }
 
-  // setStatus(): void {
-  //   if (this.expectedStock.state == 0)
-  //   {
-  //     this.expectedStock.state = 0;
-  //     this.expectedStock.status = 0;
-  //   }
-  //   else if (this.expectedStock.state == 1)
-  //   {
-  //     this.expectedStock.state = 1;
-  //     this.expectedStock.status = 1;
-  //   }
-  // }
 
-  ngOnInit(): void {
 
-    // need create service
-    DataTable.ext.classes.length.select = 'select select-sm w-16';
-    DataTable.ext.classes.paging.container = 'pagination';
-    DataTable.ext.classes.paging.button = 'btn';
-    DataTable.ext.classes.paging.active = 'active disabled';
-    DataTable.ext.classes.table = 'table table-auto table-border align-middle text-gray-700 font-medium text-sm';
-    DataTable.ext.classes.layout.tableRow = 'scrollable-x-auto';
-    DataTable.select.classes.checkbox = 'checkbox';
-
-    this.loadData();
-  }
+ 
 
   // Вызов метода экспорта отображаемых данных
   onExportVisibleData(): void {
@@ -256,12 +594,16 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     const csvData = [columnHeaders.join(';'), ...exportData.map((row: ExpectedStock[]) =>
       visibleColumns.map((colIndex: number) => {
         const colData = this.datatableExpectedContainers.column(colIndex).dataSrc().toString();
+        //console.log(colData);
+         
         const value = this.getNestedValue(row, colData)
+        console.log(value);
+        
         return colData.includes('Date') ? this.formatDate(value) : value
       }).join(';'))].join('\n');
 
     // Вызов метода экспорта в файл
-    this.exportToCSV(csvData, 'dataExport.csv');
+    //this.exportToCSV(csvData, 'dataExport.csv');
   }
 
   private getNestedValue(obj: any, path:string): any {
@@ -338,9 +680,11 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.isApplicationDateFilterActive = false;
     this.loadData();
   }
+  
   // Инициализация DataTable
-  private initializeDataTable(data: any[]): void {
+  private initializeDataTable1(data: any[]): void {
 
+    const self = this;
     const configDataTable: Config = {
     
       processing: true,
@@ -365,6 +709,27 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
             table.processing(false);
           }, 0);
         });
+
+        // table.on('select', function (e, dt, type, indexes) {
+        //   if (type === 'row') {
+        //     console.log('indexes: ' , indexes)
+        //     const rowData = table.row(indexes).data();
+        //     console.log('Selected Row Data:', rowData);
+        //   }
+        // });
+
+        // $('td:first-child').on('change', function (event) {
+          
+        //   const select = event.target as HTMLInputElement;
+        //   const row = $(select).closest('tr'); // Находим строку, содержащую чекбокс
+        //   const selectedRowIndex = table.row(row).index();// .closest('tr').index());
+        //   const selectedRow = table.row(selectedRowIndex).data();
+
+        //   console.log(selectedRowIndex);
+        //   if (select.checked)
+        //     self.selectedExpectedContainers.push(selectedRow);
+        //   else self.selectedExpectedContainers = self.selectedExpectedContainers.filter(item => item.id != selectedRow.id);
+        // })
       },
 
       order: [5, 'desc'],
@@ -385,7 +750,22 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
         },
         { 
           title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Контейнер</span><span class="sort-icon"></span></span>`,
-          data: 'container.number', 
+          data: 'container', 
+          render: function(data) {
+            switch (data.isValidControlDigit)
+            {
+              case true:
+                return `<a href="#" class="text-sm font-medium text-gray-900 hover:text-primary">${data.number}</a> <i class="ki-filled ki-verify me-1 text-success"></i><div class="tooltip transition-opacity duration-300" id="transition_tooltip">
+                Sleek tooltip with opacity transition effect.
+               </div>`;
+               case false:
+                return `${data.number} <i class="ki-filled ki-information me-1 text-warning" data-tooltip="#transition_tooltip"></i><div class="tooltip" id="transition_tooltip">
+                Контрольная цифра не соответствует.
+               </div>`;
+               default:
+                return data.number;
+            }
+          }
         },
         { 
           title: `<span class="sort"><span class="sort-label font-normal text-gray-700">Тип</span><span class="sort-icon"></span></span>`,
@@ -502,7 +882,7 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     forkJoin({
       typeContainers: this.typeContainerServ.getGetTypeContainers(),
       currentStock: this.stockServ.getStock(this.stockId),
-      expectedStocks: this.stockDetailServ.getStockDetail(this.stockId)
+      expectedStocks: this.stockDetailServ.getAllExpectedContainersByStockId(this.stockId)
     }).subscribe({
       next: (results) => {
         setTimeout(() => {
@@ -510,8 +890,8 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
           this.currentStock = results.currentStock.data;
           this.expectedStocks = results.expectedStocks.data; console.log(this.expectedStocks);
 
-          this.loadedCount = this.expectedStocks.filter(el => el.state == 1).length;
-          this.emptyCount = this.expectedStocks.filter(el => el.state == 0).length;
+          // this.loadedCount = this.expectedStocks.filter(el => el.state == 1).length;
+          // this.emptyCount = this.expectedStocks.filter(el => el.state == 0).length;
 
           this.initializeDataTable(this.expectedStocks);
         }, 0);
@@ -530,15 +910,15 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
     this.datatableExpectedContainers.column(object.getAttribute('data-index')).search(object.value).draw();
   }
 
-  stateCntr: 'empty' | 'loaded' | 'neutral' = 'neutral';
+  stateCntr: 'empty' | 'loaded' | null = null;
 
-  toggleState(): void {
-    if (this.stateCntr == 'neutral')
-      this.stateCntr = 'empty';
-    else if (this.stateCntr == 'empty')
-      this.stateCntr = 'loaded';
-    else this.stateCntr = 'neutral';
-  }
+  // toggleState(): void {
+  //   if (this.stateCntr == 'neutral')
+  //     this.stateCntr = 'empty';
+  //   else if (this.stateCntr == 'empty')
+  //     this.stateCntr = 'loaded';
+  //   else this.stateCntr = 'neutral';
+  // }
 
   onIsLoadedCntrChange(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -556,4 +936,33 @@ export class ExpectedStockDetailComponent implements OnInit, AfterViewInit {
         break;
     }
   }
+
+  // Модальное окно переадресации контейнеров
+  //
+  @ViewChildren('fileInput') fileInputs!: QueryList<ElementRef>; // Получение всех элементов fileInput из DOM
+
+  // Открытие диалогового окна для выбора документов
+  onOpenFileDialog(index: number): void {
+    const fileInputArray = this.fileInputs.toArray();
+    const fileInput = fileInputArray[index]?.nativeElement
+
+    if (fileInput)
+      fileInput.click(); // Запускаем собитие click у элемента input
+  }
+
+  onSelectFile(event: Event, index: number): void {
+    const input = (event.target as HTMLInputElement);
+
+    if (input?.files)
+    {
+      const count = input.files.length;
+      this.selectedExpectedContainers[index].fileCount = `${count} ${this.textServ.getFileWord(count)}`;
+    }
+  }
+
+  documentsInputChange(event): void {
+    var count = event.target.files.length;
+    document.getElementById('documentsCount').textContent = `${count} ${this.textServ.getFileWord(count)}`
+  }
+  //
 }

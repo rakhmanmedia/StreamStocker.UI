@@ -1,9 +1,10 @@
 import { Directive, forwardRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { ContainerService } from '../services/container-services/container.service';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, map, of, switchMap } from 'rxjs';
 import { StatusImportContainer } from '../models/status-import-container.enum';
 import { Container } from '../models/container';
+import { ContainerCheckResponse } from '../models/container-check-response';
 
 @Directive({
   selector: '[appContainerValidator]',
@@ -21,7 +22,7 @@ export class ContainerValidatorDirective implements AsyncValidator, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isValidatorActive']) {    
       if(this.control) {
-        this.validate(this.control).subscribe(() => {this.control.updateValueAndValidity({onlySelf: true, emitEvent: false})})
+        this.validate(this.control).subscribe(() => {this.control.updateValueAndValidity({onlySelf: true, emitEvent: true})})
       }
     }
   }
@@ -35,20 +36,28 @@ export class ContainerValidatorDirective implements AsyncValidator, OnChanges {
 
     const container = { number : control.value } as Container;
 
-    return this.containerServ.checkContainer(container).pipe(map((resp) => 
-      {
-        switch(resp.data){
-          case StatusImportContainer.InvalidControlDigit:
-            return { invalidControlDigit : true, message: resp.description};
-            case StatusImportContainer.InvalidFormat:
-            return { invalidFormat : true, message: resp.description};
-          default:
-            return { containerError: 'Неизвестный статус.' };
-        }
-      }), catchError((err) => of({'errorContainer': true, 'message': err.error.description})));
+    return this.containerServ.checkContainer(container)
+    .pipe(switchMap(resp => {
+      if (resp.data.status == StatusImportContainer.MarkedForDeletion)
+        return of({ markerdForDeletion: true, message: resp.data.description, sessionContainerId: resp.data.sessionContainerId })
 
-    // return this.containerServ.checkContainer(control.value).pipe(map((resp) => 
-    //   (resp.data ? null : {'invalidContainer': true, 'message': resp.description})), 
-    // catchError((err) => of({'errorContainer': true, 'message': err.error.description})));
+      return of(this.mapValidationError(resp.data, resp.description));
+    }),
+    catchError((err) => of({'errorContainer': true, 'message': err.error.description})));
+  }
+
+  private mapValidationError(containerCheckResponse: ContainerCheckResponse, description: string): ValidationErrors {
+    switch(containerCheckResponse.status) {
+      case StatusImportContainer.InvalidControlDigit:
+        return { invalidControlDigit : true, message: containerCheckResponse.description};
+        case StatusImportContainer.InvalidFormat:
+        return { invalidFormat : true, message: containerCheckResponse.description};
+      case StatusImportContainer.AlreadyExist:
+        return { alreadyExist: true, message: containerCheckResponse.description };
+      case StatusImportContainer.Valid:
+        return null;
+      default:
+        return { containerError: true, message: 'Неизвестная ошибка.' };
+    }
   }
 }

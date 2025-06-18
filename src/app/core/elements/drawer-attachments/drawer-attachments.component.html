@@ -1,0 +1,130 @@
+<ng-container *ngIf="attachments?.length; else loadingTemplate">
+    <div class="flex justify-between h-full">
+        <ng-container *ngIf="!isMobileView && selectedTab == 0 && (currentAttachment != undefined || currentAttachment != null && currentAttachment.typeAttachment == 'Image')">
+            <div class="flex flex-col items-center justify-center gap-5 border-r">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-600">
+                        {{currentAttachment.guideStatusDocument.description}} / {{currentAttachment.fileName}}
+                    </h3>
+                </div>
+                <div class="flex max-w-[1100px] min-w-[1000px] items-center justify-center">
+                    <div class="px-5 w-full">
+                        <ng-container *ngIf="currentAttachment != undefined || currentAttachment != null; else imageContent">
+                            <div class="flex gap-1 items-center justify-between">
+                                <button class="menu-toggle btn btn-lg btn-icon btn-light btn-clear"
+                                    [disabled]="currentImageIndex == 0 && activeGuideStatusIndex == 0" (click)="showPreviousImage()">
+                                    <i class="ki-filled ki-left">
+                                    </i>
+                                </button>
+                                <div class="image-viewer"><img [src]="currentImageUrl" class="w-full h-auto"
+                                        loading="lazy" /></div>
+                                <button class="menu-toggle btn btn-lg btn-icon btn-light btn-clear"
+                                    [disabled]="currentImageIndex == groupedOnStatusImagesArray[activeGuideStatusIndex]?.item.length - 1 && activeGuideStatusIndex == groupedOnStatusImagesArray.length - 1" (click)="showNextImage()">
+                                    <i class="ki-filled ki-right">
+                                    </i>
+                                </button>
+                            </div>
+                        </ng-container>
+                        <ng-template #imageContent>
+                            <div class="p-5 image-viewer">
+                                <div class="image-viewer"><img src="assets/media/illustrations/9.svg"
+                                        class="max-h-[100px]" loading="lazy" /></div>
+                            </div>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <div class="flex flex-col gap-4 max-w-[300px] min-w-[300px]">
+            <div class="flex items-center justify-between p-5 border-b">
+                <h3 class="text-base font-semibold text-gray-900">
+                    Вложения
+                </h3>
+                <button class="btn btn-xs btn-icon btn-light" data-drawer-dismiss="true" (click)="closeImageViewer()">
+                    <i class="ki-outline ki-cross">
+                    </i>
+                </button>
+            </div>
+            <div class="scrollable-y py-0 pl-5 pr-2 mr-3">
+                <div class="tabs mb-5" data-tabs="true" #kttabs>
+                    <button class="tab" [class.active]="selectedTab==0" (click)="selectTab(0)">
+                        <i class="ki-filled ki-instagram">
+                        </i>
+                        Изображения
+                    </button>
+                    <button class="tab" [class.active]="selectedTab==1" (click)="selectTab(1)">
+                        <i class="ki-filled ki-document">
+                        </i>
+                        Документы
+                    </button>
+                </div>
+                <div [ngClass]="{'hidden' : selectedTab != 0}" id="tab_images">
+                    <div data-accordion="true" #ktaccordion>
+                        <div *ngFor="let group of groupedOnStatusImagesArray; let groupIndex = index">
+                            <div *ngIf="!group.isEmpty" class="accordion-item [&:not(:last-child)]:border-b border-b-gray-200"
+                                data-accordion-item="true" [attr.id]="'accordion_item_guide_status_document_images_'+ groupIndex">
+                                <button class="accordion-toggle py-4 group"
+                                    [attr.data-accordion-toggle]="'#accordion_content_guide_status_document_images_'+ groupIndex">
+                                    <span class="text-base text-gray-900 font-medium file-name" [title]="group.description">
+                                        {{group.description}}
+                                    </span>
+                                    <i class="ki-outline ki-plus text-gray-600 text-2sm accordion-active:hidden block">
+                                    </i>
+                                    <i class="ki-outline ki-minus text-gray-600 text-2sm accordion-active:block hidden">
+                                    </i>
+                                </button>
+                                <div class="accordion-content hidden"
+                                    [attr.id]="'accordion_content_guide_status_document_images_' + groupIndex">
+                                    <div class="grid gap-5 px-0 py-5">
+                                        <div class="flex items-center  gap-3" *ngFor="let image of group.item; let imageIndex = index">
+                                            <div class="flex items-center grow gap-2.5">
+                                                <img [src]="getFileIcon(image.fileName)">
+                                                <div class="flex flex-col">
+                                                    <a class="text-sm font-medium text-gray-900 cursor-pointer hover:text-primary mb-px file-name"
+                                                        (click)="onSelectAttachment(image, groupIndex, imageIndex)"
+                                                        data-modal-toggle="#image_viever_modal" [title]="image.specialFileName"
+                                                        [ngClass]="{'text-primary': currentAttachment==image}">
+                                                        {{image.specialFileName || image.fileName}}
+                                                    </a>
+                                                    <span class="text-xs text-gray-700">
+                                                        {{(image.fileSize / 1024) | number : '1.2-2'}} КБ {{image.uploadDate
+                                                        |
+                                                        date:'yyyy-MM-dd HH:mm'}}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <a class="menu-link" (click)="openModalConfirmRemove(image.id, true)">
+                                                    <span class="menu-icon">
+                                                        <i class="ki-filled ki-trash">
+                                                        </i>
+                                                    </span>
+                                                </a>
+                                                <a class="menu-link" [href]="image.downloadLink">
+                                                    <span class="menu-icon">
+                                                        <i class="ki-filled ki-exit-down">
+                                                        </i>
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-start gap-4 border-t p-5">
+                        <!-- <button class="btn btn-link" (click)="downloadArchive()">Скачать архив</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+</ng-container>
+
+<ng-template #loadingTemplate>
+    <div class="text-center py-5">
+      <i class="spinner-border text-primary"></i>
+      <div>Загрузка данных...</div>
+    </div>
+  </ng-template>

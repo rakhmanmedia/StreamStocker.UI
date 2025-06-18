@@ -1,0 +1,94 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+.mt-auto {
+  margin-top: auto;
+}
+
+.modal-center-y {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.drawer-end {
+    top: 0;
+    bottom: 0;
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    transform: translateX(100%);
+}
+
+/* Spinners */
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+  }
+  
+  .spinner-border {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    vertical-align: text-bottom;
+    border: 0.2rem solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
+  }
+  
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.1rem;
+  }
+  
+  @keyframes spinner-grow {
+    0% {
+      transform: scale(0);
+    }
+    50% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  
+  .spinner-grow {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    vertical-align: text-bottom;
+    background-color: currentColor;
+    border-radius: 50%;
+    opacity: 0;
+    animation: spinner-grow .75s linear infinite;
+  }
+  
+  .spinner-grow-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+  /* End Spinners */
+
+  .max-w-\[80\%\] {
+    max-width: 80%;
+  }
+
+  .max-w-\[1100px\] {
+    max-width: 1100px;
+  }
+
+  .file-name {
+    max-width: 150px; /* Задай свою ширину */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.image-viewer img {
+  max-width: 80vw;   /* Максимальная ширина — 95% экрана */
+  max-height: 80vh;  /* Максимальная высота — 95% экрана */
+  display: block;    /* Убирает лишние отступы */
+  margin: auto;      /* Центрирует изображение */
+  object-fit: contain; /* Сохраняет пропорции, без обрезки */
+  overflow: hidden;
+}

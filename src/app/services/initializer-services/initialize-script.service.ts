@@ -22,10 +22,12 @@ export class InitializeScriptService {
     return new Promise((resolve, reject) => {
       const script = this.renderer.createElement('script');
       script.src = src;
+      script.type = 'text/javascript';
+      script.defer = true;
 
       script.onload = () => {
         console.log(`${src} загружен.`)
-        this.loadedScripts.add(script);
+        this.loadedScripts.add(src);
         resolve();
       };
 

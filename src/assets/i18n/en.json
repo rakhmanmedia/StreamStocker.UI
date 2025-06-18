@@ -1,0 +1,40 @@
+{
+    "DASHBOARD_WELCOME_TITLE": "Welcome to StreamStocker!",
+    "DASHBOARD_WELCOME_MESSAGE": "We're thrilled to have you on board and excited for the journey ahead together.",
+    "MENU": {
+        "EXPECTED_CONTAINERS": "Expected containers",
+        "EXPECTED": "Expected",
+        "DELETED": "Deleted",
+        "REDIRECTED": "Redirected",
+        "EMPTY_CONTAINERS": "Empty containers",
+        "EMPTY_AVAILABLE": "Empty available"
+    },
+    "EXPECTED_STOCK": {
+        "TITLE": "Expected stock",
+        "SUBTITLE": "Monitoring of expected containers",
+        "SHOW_INACTIVE_BUTTON_CAPTION": "Show inactive",
+        "HIDE_INACTIVE_BUTTON_CAPTION": "Hide inactive",
+        "CARD_OPEN_BUTTON_CAPTION": "Open"
+    },
+    "EXPECTED": {
+        "TITLE": "Expected",
+        "SUBTITLE": "List of expected containers"
+    },
+    "DELETED": {
+        "TITLE": "Deleted",
+        "SUBTITLE": "List of containers marked for deletion"
+    },
+    "REDIRECTED": {
+        "TITLE": "Redirected",
+        "SUBTITLE": "List of redirected containers",
+        "SHOW_ALL_BUTTON": "Show all"
+    },
+    "EMPTY_STOCK": {
+        "TITLE": "Empty stock",
+        "SUBTITLE": "Monitoring of empty containers"
+    },
+    "EMPTY": {
+        "TITLE": "Empty",
+        "SUBTITLE": "List of empty containers"
+    }
+}

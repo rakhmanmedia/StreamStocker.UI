@@ -1,0 +1,40 @@
+{
+    "DASHBOARD_WELCOME_TITLE": "Добро пожаловать в StreamStocker!",
+    "DASHBOARD_WELCOME_MESSAGE": "Мы очень рады видеть вас на борту и с нетерпением ждем предстоящего совместного путешествия.",
+    "MENU": {
+        "EXPECTED_CONTAINERS": "Ожидаемые контейнеры",
+        "EXPECTED": "Ожидаемые",
+        "DELETED": "Удаленные",
+        "REDIRECTED": "Переадресованные",
+        "EMPTY_CONTAINERS": "Порожние контейнеры",
+        "EMPTY_AVAILABLE": "Порожние наличие"
+    },
+    "EXPECTED_STOCK":{
+        "TITLE": "Сток ожидаемых",
+        "SUBTITLE": "Мониторинг ожидаемых контейнеров",
+        "SHOW_INACTIVE_BUTTON_CAPTION": "Показать неактивные",
+        "HIDE_INACTIVE_BUTTON_CAPTION": "Скрыть неактивные",
+        "CARD_OPEN_BUTTON_CAPTION": "Открыть"
+    },
+    "EXPECTED": {
+        "TITLE": "Ожидаемые",
+        "SUBTITLE": "Список ожидаемых контейнеров"
+    },
+    "DELETED": {
+        "TITLE": "Удаленные",
+        "SUBTITLE": "Список контейнеров с отметкой на удаление"
+    },
+    "REDIRECTED": {
+        "TITLE": "Переадресованные",
+        "SUBTITLE": "Список переадресованных контейнеров",
+        "SHOW_ALL_BUTTON": "Показать все"
+    },
+    "EMPTY_STOCK": {
+        "TITLE": "Сток порожних",
+        "SUBTITLE": "Мониторинг порожних контейнеров"
+    },
+    "EMPTY": {
+        "TITLE": "Порожние",
+        "SUBTITLE": "Список порожних контейнеров"
+    }
+}

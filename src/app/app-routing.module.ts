@@ -7,6 +7,8 @@ import { ExpectedStockDetailComponent } from './components/expected-stock-detail
 import { Page404Component } from './components/page-404/page-404.component';
 import { DeletedContainersComponent } from './components/expected/deleted-containers/deleted-containers.component';
 import { RedirectedContainersComponent } from './components/expected/redirected-containers/redirected-containers.component';
+import { EmptyStockComponent } from './components/empty/empty-stock/empty-stock.component';
+import { EmptyContainersComponent } from './components/empty/empty-containers/empty-containers/empty-containers.component';
 
 const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -17,6 +19,8 @@ const routes: Routes = [
   { path: 'redirected-containers', component: RedirectedContainersComponent },
   { path: 'expected-stock/:id', component: ExpectedStockDetailComponent },
   { path: 'expected-stock/detail', component: ExpectedStockDetailComponent },
+  { path: 'empty-stock', component: EmptyStockComponent },
+  { path: 'empty-stock/:id', component: EmptyContainersComponent },
   { path: '**', component: Page404Component }
 ];
 

@@ -6,7 +6,7 @@
 <!-- End Sidebar -->
 
 <!-- Wrapper -->
-<div class="wrapper flex grow flex-col rounded-lg border p-4 scrollable">
+<div class="wrapper flex grow flex-col rounded-lg border scrollable-y dark:bg-coal-600 bg-light">
 
     <!-- Header -->
     <app-header
@@ -15,7 +15,15 @@
     <!-- End Header -->
 
     <!-- Content -->
-    <main class="grow content pt-5" id="content" role="content"><app-preloader *ngIf="isLoading"></app-preloader><router-outlet /></main>
+    <main class="grow content pt-5" id="content" role="content">
+        <ng-container *ngIf="isLoading else content">
+            <app-preloader></app-preloader>
+        </ng-container>
+
+        <ng-template #content>
+            <router-outlet />
+        </ng-template>
+    </main>
     <!-- End Content -->
 
     <!-- Footer -->

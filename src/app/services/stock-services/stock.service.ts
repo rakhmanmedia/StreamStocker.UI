@@ -7,6 +7,7 @@ import { ACCESS_TOKEN_KEY } from '../auth.service';
 import { Guid } from 'guid-typescript';
 import { Stock } from '../../models/stock';
 import { CountContainers } from '../../models/countContainers';
+import { EmptyContainerCount } from '../../models/empty-container-count';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +31,10 @@ export class StockService {
   }
 
   getCountContainers(stockId: Guid): Observable<IBaseResponse<CountContainers>> {
-    return this.http.get<IBaseResponse<CountContainers>>(`${this.stokerApi}/api/expectedstock/get-count-container`, { headers: new HttpHeaders({'stockId': stockId.toString()}) });
+    return this.http.get<IBaseResponse<CountContainers>>(`${this.stokerApi}/api/expectedcontainer/get-count-container`, { headers: new HttpHeaders({'stockId': stockId.toString()}) });
+  }
+
+  getEmptyContainerCount(stockId: Guid) : Observable<IBaseResponse<EmptyContainerCount>> {
+    return this.http.get<IBaseResponse<EmptyContainerCount>>(`${this.stokerApi}/api/emptycontainer/get-count-container`, { headers: new HttpHeaders({'stockId': stockId.toString()}) });
   }
 }

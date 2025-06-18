@@ -2,8 +2,8 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { StockService } from '../../services/stock-services/stock.service';
 import { Stock } from '../../models/stock';
 import { CountContainers } from '../../models/countContainers';
-import { InitializeScriptService } from '../../services/initializer-services/initialize-script.service';
-import { StockDetailService } from '../../services/stock-services/stock-detail.service';
+import { ToastrService } from 'ngx-toastr';
+import { forkJoin, map, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-expected-stock',
@@ -11,52 +11,69 @@ import { StockDetailService } from '../../services/stock-services/stock-detail.s
   styleUrl: './expected-stock.component.css'
 })
 
-export class ExpectedStockComponent implements OnInit, AfterViewInit {
-
-  readonly title: string;
-  readonly subTitle: string;
-  
+export class ExpectedStockComponent implements OnInit {
+ 
   constructor (
     private stockServ: StockService,
-    private initScriptServ: InitializeScriptService
-  ) {
-    this.title = 'Сток ожидаемых'
-    this.subTitle = 'Мониторинг ожидаемых контейнеров';
-  }
-  ngAfterViewInit(): void {
-    this.initScriptServ.loadScript('./assets/js/core.bundle.js')
-    .then(() => 
-      console.log('Скрипт core.bundle.js загружен и готов к использованию.'))
-    .catch((error) => 
-      console.log(`При загружке скрипта core.bundle.js произошла ошибка: ${error}`));
-  }
+    private toastr: ToastrService
+  ) { }
   
-  stocks: Stock[] = []; 
-  countContainers = new CountContainers();
+  stocks: Stock[] = []; // список стоков
+  filtredStocks: Stock[] = []; // список стоков
+  stocksCount: number = 0;
+  isLoading: boolean = false;
+  isError: boolean = false;
+  //countContainers = new CountContainers();
   
   ngOnInit(): void {
-      this.onLoadStocks();
+    this.isLoading = true;
+    this.isError = false;
+    this.onLoad();
   }
 
   // Loading of Stocks
-  onLoadStocks(): void {
-    this.stockServ.getStocks().subscribe(res => { this.stocks = res.data;
-      
-      for (let stock of this.stocks) {
-        this.stockServ.getCountContainers(stock.id).subscribe(res => {
-          this.countContainers = res.data;
-          stock.emptyCntrsCount = this.countContainers.emptyCount;
-          stock.loadedCntrsCount = this.countContainers.loadedCount;
-        })
+  onLoad(): void {
+    this.stockServ.getStocks()
+    .pipe(switchMap(stocksResponse => {
+      const stocks = stocksResponse.data
+      if (!stocks?.length) return of([]);
+
+      return forkJoin(
+        stocks.map(stock => 
+          this.stockServ.getCountContainers(stock.id)
+          .pipe(map(countContainer => ({
+            ...stock, 
+            emptyCntrsCount: countContainer?.data?.emptyCount ?? 0, 
+            loadedCntrsCount: countContainer?.data?.loadedCount ?? 0
+          })))
+        )
+      )
+    }))
+    .subscribe({
+      next: (result) => {
+        this.stocks = result;
+        this.showUnactive();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isError = true;
+        this.toastr.error(err.error);
       }
-    });
+    })
   }
 
-  isShowUnactive: boolean = false;
-
+  isShowUnactive: boolean = true;
   showUnactive(): void {
-    if (this.isShowUnactive) this.isShowUnactive = false; 
-    else this.isShowUnactive = true;
+    this.isShowUnactive = !this.isShowUnactive;
+
+    if (!this.stocks) return;
+
+    this.filtredStocks = this.isShowUnactive
+      ? [...this.stocks]
+      : this.stocks.filter(stock => stock.emptyCntrsCount > 0 || stock.loadedCntrsCount > 0);
+
+    this.stocksCount = this.filtredStocks.length;
+
   }
 
   isTileView: boolean = true;

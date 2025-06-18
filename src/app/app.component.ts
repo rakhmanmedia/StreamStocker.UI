@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
+import { InitializeScriptService } from './services/initializer-services/initialize-script.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +11,15 @@ import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Rout
 export class AppComponent {
   isLoading: boolean = true;
 
-  constructor(private router: Router) {
+  constructor(
+    private translate: TranslateService,
+    private router: Router,
+    private initScriptServ: InitializeScriptService
+  ) {
+    this.translate.setDefaultLang('ru');
+    const savedLang = localStorage.getItem('lang') || 'ru';
+    this.translate.use(savedLang);
+
     router.events.subscribe((event) => {
       if (event instanceof NavigationStart)
         this.isLoading = true;
@@ -20,8 +30,7 @@ export class AppComponent {
       )
         setTimeout(() => {
           this.isLoading = false;
-        }, 500);
-        
+        }, 500);     
     });
   }
 }

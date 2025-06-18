@@ -10,37 +10,37 @@
 <ng-template #content>
 
     <ng-container *ngIf="!isError; else noData">
+
         <!-- Title Container -->
         <div class="container-fixed">
             <div class="flex flex-wrap items-center lg:items-end justify-between gap-5 pb-7.5">
                 <div class="flex flex-col justify-center gap-2">
                     <h1 class="text-xl font-medium leading-none text-gray-900">
-                        {{title}}
+                        {{'REDIRECTED.TITLE' | translate}}
                     </h1>
                     <div class="flex items-center gap-2 text-sm font-normal text-gray-700">
-                        {{subTitle}}
+                        {{'REDIRECTED.SUBTITLE' | translate}}
                     </div>
                 </div>
-    
+
                 <div class="flex items-center gap-2.5">
                     <label for="checkShowAll" class="switch">
                         <span class="switch-label">
-                            Показать все
+                            {{'REDIRECTED.SHOW_ALL_BUTTON' | translate}}
                         </span>
-                        <input id="checkShowAll" name="check" type="checkbox" value="1"
+                        <input id="checkShowAll" name="check" type="checkbox" [checked]="isShowAll"
                             (change)="isShowAllChange($event)" />
                     </label>
                 </div>
             </div>
         </div>
         <!-- End Title Container -->
-    
+
         <!-- Table Container -->
-    
         <div class="container-fixed">
             <div class="grid gap-5 lg:gap-7.5">
                 <div class="card card-grid min-w-full">
-                    <div class="card-body scrollable-x">
+                    <div class="card-body">
                         <table id="datatable_redirected_containers" #datatableRedirectedContainers>
                             <tbody></tbody>
                         </table>
@@ -48,8 +48,349 @@
                 </div>
             </div>
         </div>
+        <!-- End Table Container -->
+
+        <!-- Drawer-Start -->
+        <app-drawer-attachments class="drawer drawer-end" data-drawer="true" id="kt_drawer_example" [attachments]="attachments"></app-drawer-attachments>
+        <div class="drawer drawer-end" data-drawer="true" id="kt_drawer_example1">
+            <div class="flex justify-between h-full">
+                <ng-container *ngIf="!isMobileView && selectedTab == 0 && (currentAttachment != undefined || currentAttachment != null && currentAttachment.typeAttachment == 'Image')">
+                    <div class="flex flex-col items-center justify-center gap-5 border-r">
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-600">
+                                {{currentAttachment.guideStatusDocument.description}} / {{currentAttachment.fileName}}
+                            </h3>
+                        </div>
+                        <div class="flex max-w-[1100px] min-w-[1000px] items-center justify-center">
+                            <div class="px-5 w-full">
+                                <ng-container *ngIf="currentAttachment != undefined || currentAttachment != null; else imageContent">
+                                    <div class="flex gap-1 items-center justify-between">
+                                        <button class="menu-toggle btn btn-lg btn-icon btn-light btn-clear"
+                                            [disabled]="currentImageIndex == 0 && activeGuideStatusIndex == 0" (click)="showPreviousImage()">
+                                            <i class="ki-filled ki-left">
+                                            </i>
+                                        </button>
+                                        <div class="image-viewer"><img [src]="currentImageUrl" class="w-full h-auto"
+                                                loading="lazy" /></div>
+                                        <button class="menu-toggle btn btn-lg btn-icon btn-light btn-clear"
+                                            [disabled]="currentImageIndex == groupedOnStatusImagesArray[activeGuideStatusIndex]?.item.length - 1 && activeGuideStatusIndex == groupedOnStatusImagesArray.length - 1" (click)="showNextImage()">
+                                            <i class="ki-filled ki-right">
+                                            </i>
+                                        </button>
+                                    </div>
+                                </ng-container>
+                                <ng-template #imageContent>
+                                    <div class="p-5 image-viewer">
+                                        <div class="image-viewer"><img src="assets/media/illustrations/9.svg"
+                                                class="max-h-[100px]" loading="lazy" /></div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <div class="flex flex-col gap-4 max-w-[300px] min-w-[300px]">
+                    <div class="flex items-center justify-between p-5 border-b">
+                        <h3 class="text-base font-semibold text-gray-900">
+                            Вложения
+                        </h3>
+                        <button class="btn btn-xs btn-icon btn-light" data-drawer-dismiss="true" (click)="closeImageViewer()">
+                            <i class="ki-outline ki-cross">
+                            </i>
+                        </button>
+                    </div>
+                    <div class="scrollable-y py-0 pl-5 pr-2 mr-3">
+                        <div class="tabs mb-5" data-tabs="true" #kttabs>
+                            <button class="tab" [class.active]="selectedTab==0" (click)="selectTab(0)">
+                                <i class="ki-filled ki-instagram">
+                                </i>
+                                Изображения
+                            </button>
+                            <button class="tab" [class.active]="selectedTab==1" (click)="selectTab(1)">
+                                <i class="ki-filled ki-document">
+                                </i>
+                                Документы
+                            </button>
+                        </div>
+                        <div [ngClass]="{'hidden' : selectedTab != 0}" id="tab_images">
+                            <div data-accordion="true" #ktaccordion>
+                                <div *ngFor="let group of groupedOnStatusImagesArray; let groupIndex = index">
+                                    <div *ngIf="!group.isEmpty" class="accordion-item [&:not(:last-child)]:border-b border-b-gray-200"
+                                        data-accordion-item="true" [attr.id]="'accordion_item_guide_status_document_images_'+ groupIndex">
+                                        <button class="accordion-toggle py-4 group"
+                                            [attr.data-accordion-toggle]="'#accordion_content_guide_status_document_images_'+ groupIndex">
+                                            <span class="text-base text-gray-900 font-medium file-name" [title]="group.description">
+                                                {{group.description}}
+                                            </span>
+                                            <i class="ki-outline ki-plus text-gray-600 text-2sm accordion-active:hidden block">
+                                            </i>
+                                            <i class="ki-outline ki-minus text-gray-600 text-2sm accordion-active:block hidden">
+                                            </i>
+                                        </button>
+                                        <div class="accordion-content hidden"
+                                            [attr.id]="'accordion_content_guide_status_document_images_' + groupIndex">
+                                            <div class="grid gap-5 px-0 py-5">
+                                                <div class="flex items-center  gap-3" *ngFor="let image of group.item; let imageIndex = index">
+                                                    <div class="flex items-center grow gap-2.5">
+                                                        <img [src]="getFileIcon(image.fileName)">
+                                                        <div class="flex flex-col">
+                                                            <a class="text-sm font-medium text-gray-900 cursor-pointer hover:text-primary mb-px file-name"
+                                                                (click)="onSelectAttachment(image, groupIndex, imageIndex)"
+                                                                data-modal-toggle="#image_viever_modal" [title]="image.specialFileName"
+                                                                [ngClass]="{'text-primary': currentAttachment==image}">
+                                                                {{image.specialFileName || image.fileName}}
+                                                            </a>
+                                                            <span class="text-xs text-gray-700">
+                                                                {{(image.fileSize / 1024) | number : '1.2-2'}} КБ {{image.uploadDate
+                                                                |
+                                                                date:'yyyy-MM-dd HH:mm'}}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex gap-2">
+                                                        <a class="menu-link" (click)="openModalConfirmRemove(image.id, true)">
+                                                            <span class="menu-icon">
+                                                                <i class="ki-filled ki-trash">
+                                                                </i>
+                                                            </span>
+                                                        </a>
+                                                        <a class="menu-link" [href]="image.downloadLink">
+                                                            <span class="menu-icon">
+                                                                <i class="ki-filled ki-exit-down">
+                                                                </i>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-start gap-4 border-t p-5">
+                                <button class="btn btn-link" (click)="downloadArchive()">Скачать архив</button>
+                            </div>
+                        </div>
+                        <div [ngClass]="{'hidden' : selectedTab != 1}" id="tab_docs">
+                            <div data-accordion="true">
+                                <div class="accordion-item [&:not(:last-child)]:border-b border-b-gray-200"
+                                    data-accordion-item="true"
+                                    [attr.id]="'accordion_item_guide_status_document_documents_'+ groupIndex"
+                                    *ngFor="let group of groupedOnStatusDocumentsArray; let groupIndex = index">
+                                    <button class="accordion-toggle py-4 group"
+                                        [attr.data-accordion-toggle]="'#accordion_content_guide_status_document_documents_'+ groupIndex">
+                                        <span class="text-base text-gray-900 font-medium">
+                                            {{group.description}}
+                                        </span>
+                                        <i class="ki-outline ki-plus text-gray-600 text-2sm accordion-active:hidden block">
+                                        </i>
+                                        <i class="ki-outline ki-minus text-gray-600 text-2sm accordion-active:block hidden">
+                                        </i>
+                                    </button>
+                                    <div class="accordion-content hidden"
+                                        [attr.id]="'accordion_content_guide_status_document_documents_' + groupIndex">
+                                        <div class="grid gap-5 px-0 py-5">
+                                            <div class="flex items-center  gap-3"
+                                                *ngFor="let document of group.item; let documentIndex = index">
+                                                <div class="flex items-center grow gap-2.5">
+                                                    <img [src]="getFileIcon(document.fileName)">
+                                                    <div class="flex flex-col">
+                                                        <a class="text-sm font-medium text-gray-900 cursor-pointer hover:text-primary mb-px file-name"
+                                                            [title]="document.specialFileName"
+                                                            (click)="onSelectAttachment(document, groupIndex, documentIndex)"
+                                                            [ngClass]="{'text-primary': currentAttachment==document}">
+                                                            {{document.specialFileName || document.fileName}}
+                                                        </a>
+                                                        <span class="text-xs text-gray-700">
+                                                            {{(document.fileSize / 1024) | number : '1.2-2'}} КБ
+                                                            {{document.uploadDate |
+                                                            date:'yyyy-MM-dd HH:mm'}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex gap-2">
+                                                    <a class="menu-link" (click)="openModalConfirmRemove(document.id, false)">
+                                                        <span class="menu-icon">
+                                                            <i class="ki-filled ki-trash">
+                                                            </i>
+                                                        </span>
+                                                    </a>
+                                                    <a class="menu-link" [href]="document.downloadLink">
+                                                        <span class="menu-icon">
+                                                            <i class="ki-filled ki-exit-down">
+                                                            </i>
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col mt-auto" *ngIf="currentAttachment">
+                        <div class="modal-header pr-2.5">
+                            <h3 class="modal-title">
+                                Свойства
+                            </h3>
+                        </div>
+                        <div class="modal-body grid gap-5 px-0 pby-5">
+                            <form #form="ngForm" (ngSubmit)="onUpdateProperties()">
+                                <div class="flex flex-col px-5 gap-2.5">
+                                    <label for="fileName" class="form-label font-normal text-gray-900" aria-disabled="true">Исходное наименование:</label>
+                                    <input class="input input-sm" name="fileName" [(ngModel)]="currentAttachment.fileName" disabled />
+                                    <label for="specialFileName" class="form-label font-normal text-gray-900" aria-disabled="true">Специальное
+                                        наименование:</label>
+                                    <input class="input input-sm" name="specialFileName" [(ngModel)]="currentAttachment.specialFileName" />
+                                    <label for="typeDocumentName" class="form-label font-normal text-gray-900">Тип документа:</label>
+                                    <select class="select" name="state" [(ngModel)]="currentAttachment.typeDocumentId" #state="ngModel" (change)="updateSpecialName($event)">
+                                        <option value="">Выберете тип документа</option>
+                                        <option *ngFor="let typeDocument of typeDocuments" id="" value="{{typeDocument.id}}">{{typeDocument.name}}</option>
+                                    </select>
+                                    <div class="menu-separator">
+                                    </div>
+                                    <div class="flex flex-col-2 gap-2">
+                                        <button type="submit" class="btn btn-xs btn-primary justify-center"
+                                            data-modal-dismiss="true" [disabled]="form.invalid">
+                                            Сохранить
+                                        </button>
+                                        <button class="btn btn-xs btn-light justify-center" data-modal-dismiss="true">
+                                            Отмена
+                                        </button>
+                                    </div>
+                                </div>
+        
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Drawer-Start -->
+
+        <!-- Modal Confirmation Remove Attachment -->
+        <ng-container *ngIf="isModalConfirmRemoveOpen">
+            <div class="modal" style="z-index: 101;" [ngClass]="{'modal open': isModalConfirmRemoveOpen}" [ngStyle]="{'display': 'block'}" data-modal="true" data-modal-backdrop-static="true" id="modal_confirm_remove_attach">
+                <div class="modal-content modal-center-y max-w-[600px]">
+                    <div class="grid place-items-center gap-4 py-7.5">
+                        <div
+                            class="flex justify-center items-center size-14 rounded-full ring-1 ring-danger-clarity bg-danger-light">
+                            <i class="ki-filled ki-cross text-2xl text-danger"></i></div>
+                        <div class="grid place-items-center"><a href="#"
+                                class="text-base font-medium text-gray-900 hover:text-primary-active mb-px">Удаление
+                                вложений</a><span class="text-2sm text-gray-700 text-center">Вы действительно хотите удалить
+                                вложение?</span></div>
+                    </div>
+                    <div class="card-footer justify-center">
+                        <div class="flex gap-5">
+                            <button class="btn btn-light btn-sm" (click)="confirmRemove()">
+                                <i class="ki-filled ki-check-circle"></i>
+                                Да
+                            </button>
+                            <button class="btn btn-light btn-sm" data-modal-dismiss="true" (click)="closeModalConfirmRemove()">
+                                <i class="ki-filled ki-cross-circle"></i>
+                                Нет
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <!-- End Modal Confirmation Remove Attachment -->
+
+        <!-- Modal Add Attachments -->
+        <div class="modal" data-modal="true" id="add-attachments-modal">
+            <div class="modal-content modal-center max-w-[600px]">
+                <div class="modal-header">
+                    <h3 class="modal-title">Добавить вложения</h3>
+                    <button class="btn btn-xs btn-icon btn-light" data-modal-dismiss="true">
+                        <i class="ki-outline ki-cross">
+                        </i>
+                    </button>
+                </div>
+                <div class="modal-body px-5 py-5">
+                    <div class="flex flex-col gap-5">
+                        <div class="border-l-2 border-warning">
+                            <p class="text-sm text-gray-800 leading-5.5 ps-3">
+                                Размер одного загружаемого вложения не должен превышать <span
+                                    class="text text-gray-900 font-medium">5MB</span>.
+                            </p>
+                        </div>
+                        <label class="form-label max-w-32">Статус документа:</label>
+                        <select class="select" [(ngModel)]="selectedGuideStatusDocumentId">
+                            <option *ngFor="let guideStatusDocument of guideStatusDocuments" [value]="guideStatusDocument.id">{{guideStatusDocument.description}}</option>
+                        </select>
+                        <div class="flex justify-center gap-7">
+                            <div class="flex flex-col gap-3 items-center">
+                                <button type="button" class="btn btn-icon btn-primary btn-outline rounded-full"
+                                    (click)="openFileInput(AttachmentType.Image)">
+                                    <i class="ki-filled ki-instagram"></i>
+                                </button>
+                                <input id="image-input-{{selectedSessionContainerId}}" accept="image/*" type="file" multiple
+                                    style="display: none;" (change)="handleFileChange($event, AttachmentType.Image)" />
+                                <span class="text text-xs">Добавить изображение</span>
+                            </div>
+                            <div class="flex flex-col gap-3 items-center">
+                                <button type="button" class="btn btn-icon btn-primary btn-outline rounded-full"
+                                    (click)="openFileInput(AttachmentType.Document)">
+                                    <i class="ki-filled ki-document"></i>
+                                </button>
+                                <input id="document-input-{{selectedSessionContainerId}}" type="file" multiple style="display: none;"
+                                    (change)="handleFileChange($event, 'Document')" />
+                                <span class="text text-xs">Добавить документ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal End Add Attachments -->
+
+        <!-- Image Viewer Modal -->
+        <ng-container *ngIf="isImageViewerOpen && isMobileView">
+            <div class="modal" data-modal="true" id="image_viever_modal">
+                <div class="modal-content modal-center max-w-[1100px]">
+                    <div class="modal-header">
+                        <h3 class="modal-title">
+                            Галерея
+                        </h3>
+                        <button class="btn btn-xs btn-icon btn-light" data-modal-dismiss="true">
+                            <i class="ki-outline ki-cross">
+                            </i>
+                        </button>
+                    </div>
+                    <div class="modal-body px-0 py-5 image-viewer">
+                        <div class="flex justify-center w-full py-5 items-center absolute"><span
+                                class="text-2sm text-gray-500">{{currentImage.fileName}}</span></div>
+                        <div class="flex gap-1 items-center justify-between">
+
+                            <button class="menu-toggle btn btn-lg btn-icon btn-light btn-clear"
+                                [disabled]="currentImageIndex == 0" (click)="showPreviousImage()">
+                                <i class="ki-filled ki-left">
+                                </i>
+                            </button>
+                            <img [src]="currentImageUrl" class="w-full h-auto" loading="lazy" />
+                            <button class="menu-toggle btn btn-lg btn-icon btn-light btn-clear"
+                                [disabled]="currentImageIndex == images.length - 1" (click)="showNextImage()">
+                                <i class="ki-filled ki-right">
+                                </i>
+                            </button>
+                        </div>
+                        <div class="flex flex-col px-5 gap-2.5">
+                            <div class="menu-separator">
+                            </div>
+                            <div class="flex flex-col-2 gap-2">
+                                <button class="btn btn-link" (click)="downloadArchive()">Скачать архив</button>
+                            </div>
+                          </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+        <!-- End Image Viewer Modal -->
+
     </ng-container>
-    <!-- End Table Container -->
 
     <!-- No Data Container -->
     <ng-template #noData>

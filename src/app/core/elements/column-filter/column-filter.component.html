@@ -1,0 +1,90 @@
+<div id="column-dropdown-menu"
+  class="menu-default hidden shadow-default mt-2 absolute w-full max-w-64 z-50 overflow-hidden rounded-md border bg-white">
+  <div class="p-2">
+    <ng-container [ngSwitch]="colType">
+      <input *ngSwitchCase="'string'" [(ngModel)]="filterValue" type="text" placeholder="Фильтр..." class="input input-sm" (ngModelChange)="filter('value', colIndex)"/>
+      <input *ngSwitchCase="'date'" [(ngModel)]="filterValue" type="date" placeholder="Фильтр..." class="input input-sm" (ngModelChange)="filter('value', colIndex)" />
+      <input *ngSwitchCase="'time'" [(ngModel)]="filterValue" type="time" placeholder="Фильтр..." class="input input-sm" (ngModelChange)="filter('value', colIndex)" />
+      <select *ngSwitchCase="'boolean'">
+        <option [ngValue]="null">Все</option>
+        <option [ngValue]="true">Истина</option>
+        <option [ngValue]="false">Ложь</option>
+      </select>
+    </ng-container> 
+  </div>
+  <div class="menu-separator">
+  </div>
+  <div class="menu-item">
+    <a class="menu-link" (click)="sorting('asc', colIndex)" data-sort="asc">
+      <span class="menu-icon">
+        <i class="ki-filled ki-arrow-up">
+        </i>
+      </span>
+      <span class="menu-title text-sm">
+        По возрастанию
+      </span>
+      <span class="menu-icon">
+        <i class="checkmark ki-filled ki-check hidden">
+        </i>
+      </span>
+    </a>
+  </div>
+  <div class="menu-item">
+    <a class="menu-link" (click)="sorting('desc', colIndex)" data-sort="desc">
+      <span class="menu-icon">
+        <i class="ki-filled ki-arrow-down">
+        </i>
+      </span>
+      <span class="menu-title text-sm">
+        По убыванию
+      </span>
+      <span class="menu-icon">
+        <i class="checkmark ki-filled ki-check hidden">
+        </i>
+      </span>
+    </a>
+  </div>
+  <div class="menu-separator">
+  </div>
+  <div class="menu-item">
+    <a class="menu-link" (click)="filter('empty', colIndex)" data-prefilter="empty">
+      <span class="menu-icon">
+        <i class="ki-filled ki-tablet-delete">
+        </i>
+      </span>
+      <span class="menu-title text-sm">
+        Пустые
+      </span>
+      <span class="menu-icon">
+        <i class="checkmark ki-filled ki-check hidden">
+        </i>
+      </span>
+    </a>
+  </div>
+  <div class="menu-item">
+    <a class="menu-link" (click)="filter('noEmpty', colIndex)" data-prefilter="noEmpty">
+      <span class="menu-icon">
+        <i class="ki-filled ki-tablet-ok">
+        </i>
+      </span>
+      <span class="menu-title text-sm">
+        Не пустые
+      </span>
+      <span class="menu-icon">
+        <i class="checkmark ki-filled ki-check hidden">
+        </i>
+      </span>
+    </a>
+  </div>
+  <div class="menu-item">
+    <a class="menu-link" (click)="filter('clear', colIndex)" data-prefilter="clear">
+      <span class="menu-icon">
+        <i class="ki-filled ki-tablet">
+        </i>
+      </span>
+      <span class="menu-title text-sm">
+        Сбросить
+      </span>
+    </a>
+  </div>
+</div>

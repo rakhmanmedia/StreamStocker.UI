@@ -38,7 +38,6 @@ export class SearchLookupComponent<T> implements OnInit, ControlValueAccessor, O
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   
   constructor(private renderer: Renderer2) {
-    //this.loadData();
   }
 
   private _dataSource: T[];
@@ -51,6 +50,7 @@ export class SearchLookupComponent<T> implements OnInit, ControlValueAccessor, O
   @Input() set source(dataSource: T[]) {
     this._dataSource = dataSource;
   }
+
   get source(): T[] {
     return this._dataSource;
   }
@@ -58,7 +58,6 @@ export class SearchLookupComponent<T> implements OnInit, ControlValueAccessor, O
   loadData(): void {
 
     const dropdownItems = document.querySelectorAll('.dropdown-item');
-    console.log(dropdownItems.length);
 
     dropdownItems.forEach(dropdownItem => {
 
@@ -71,6 +70,7 @@ export class SearchLookupComponent<T> implements OnInit, ControlValueAccessor, O
         dropdownItem.classList.add('active');
 
         this.value = dropdownItem.innerHTML;
+        console.log(this.value);
         this.dataIdChange.emit(dropdownItem.getAttributeNode('id').value);
         this.dropdownClose();
       })
